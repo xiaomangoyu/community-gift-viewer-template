@@ -1,0 +1,25 @@
+# Generated Viewer packages
+dist/
+dist-*/
+output/
+build/
+
+# Runtime media and production data
+workflow_viewer_assets/
+assets/
+media/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.mp4
+*.mov
+*.zip
+
+# Local tooling
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

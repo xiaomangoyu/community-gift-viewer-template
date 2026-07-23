@@ -1,0 +1,62 @@
+{
+  "viewer_data_version": 1,
+  "items": [
+    {
+      "row_id": 1,
+      "anchor_id": "demo-gift-001",
+      "source_anchor_id": "0000000000000000001",
+      "host_name": "Demo Creator",
+      "community_name": "Demo Community",
+      "fan_club_name": "Demo Club",
+      "avatar": "",
+      "description": {
+        "zh": "???????? Viewer ???????????????????????????????",
+        "en": "This fictional creator introduction demonstrates the Viewer layout. Replace it with project data during the build step."
+      },
+      "element_reason": {
+        "zh": "???????????????????????",
+        "en": "A star and a sparkle demonstrate element tags and rationale layout."
+      },
+      "color_reason": {
+        "zh": "???????????????????????",
+        "en": "Purple, gold, and cyan demonstrate palette chips and rationale text."
+      },
+      "design": {
+        "exact_text": "Community",
+        "primary_object": "star",
+        "secondary_object": "sparkle",
+        "colors": [
+          "purple",
+          "gold",
+          "cyan"
+        ]
+      },
+      "stickers": [],
+      "anchor_frames": [],
+      "matting": {
+        "mainline": {
+          "status": "missing",
+          "icon": {
+            "status": "missing",
+            "asset": ""
+          },
+          "gift_panel": {
+            "status": "missing",
+            "asset": ""
+          },
+          "video": {
+            "status": "missing",
+            "asset": ""
+          }
+        },
+        "planb": {
+          "status": "missing",
+          "icon": {
+            "status": "missing",
+            "asset": ""
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1572 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community Gift Review</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f7;
+      --panel: #ffffff;
+      --line: #e8e8ed;
+      --line-strong: #d2d2d7;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --soft: #f5f5f7;
+      --soft-strong: #eeeef0;
+      --accent: #0071e3;
+      --accent-soft: #eaf3ff;
+      --green: #248a3d;
+      --green-soft: #edf8f0;
+      --amber: #8a5a00;
+      --amber-soft: #fff7e6;
+      --red: #b42318;
+      --red-soft: #fff0ee;
+      --ink: #1d1d1f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.48;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.modal-open { overflow: hidden; }
+    button { font: inherit; }
+    button {
+      border: 1px solid transparent;
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 7px 11px;
+      cursor: pointer;
+    }
+    button:hover, button.active {
+      border-color: var(--line);
+      background: #f9f9fb;
+    }
+    button:focus-visible, a:focus-visible, summary:focus-visible {
+      outline: 3px solid rgba(0,113,227,.24);
+      outline-offset: 2px;
+    }
+    .page { max-width: 1720px; margin: 0 auto; padding: 18px 24px 40px; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      min-height: 52px;
+      padding: 0 2px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .title h1 { margin: 0 0 3px; font-size: 24px; font-weight: 650; letter-spacing: 0; }
+    .title { min-width: 0; }
+    .title p { margin: 0; color: var(--muted); max-width: 900px; font-size: 12px; overflow-wrap: anywhere; }
+    .topbar-actions { display: flex; flex: 0 1 620px; min-width: 0; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 9px; }
+    .view-tabs, .lang-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid #e2e4e8; border-radius: 10px; background: #eef0f3; }
+    .view-tab, .lang-button { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 5px 10px; border: 0; border-radius: 7px; color: #5f6369; background: transparent; font-size: 12px; font-weight: 600; line-height: 1; text-decoration: none; white-space: nowrap; }
+    .view-tab:hover, .lang-button:hover { color: var(--text); background: rgba(255,255,255,.68); }
+    .view-tab.active, .lang-button.active { color: #075ea9; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.07), 0 0 0 1px rgba(0,113,227,.08); }
+    .utility-button { min-height: 36px; padding: 7px 11px; border: 1px solid #dfe2e7; border-radius: 9px; color: #34373c; background: rgba(255,255,255,.9); font-size: 12px; font-weight: 600; }
+    .utility-button:hover { border-color: #c9ced6; background: #fff; }
+    .run-context { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; color: var(--muted); font-size: 12px; }
+    .run-context strong { color: var(--text); font-weight: 600; }
+    .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); vertical-align: 1px; margin-right: 5px; }
+    .status-dot.ok { background: var(--green); }
+    .status-dot.warn { background: #d97706; }
+    .status-dot.fail { background: var(--red); }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 0;
+      margin: 14px 0 8px;
+      overflow: hidden;
+      background: var(--panel);
+      border-radius: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .035), 0 10px 28px rgba(0, 0, 0, .025);
+    }
+    .metric {
+      background: transparent;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-radius: 0;
+      padding: 14px 16px;
+      min-height: 72px;
+    }
+    .metric:last-child { border-right: 0; }
+    .metric .label { color: var(--muted); font-size: 12px; }
+    .metric .value { font-size: 24px; font-weight: 620; margin-top: 2px; letter-spacing: 0; }
+    .run-diagnostics { margin: 0 0 12px; border: 0; background: transparent; }
+    .run-diagnostics summary { display: inline-flex; align-items: center; gap: 5px; padding: 5px 2px; color: var(--muted); font-size: 12px; font-weight: 500; }
+    .run-diagnostics > .details-body { margin-top: 6px; padding: 12px 14px; border: 0; border-radius: 8px; background: rgba(255,255,255,.72); }
+    .diagnostic-grid { display: grid; grid-template-columns: repeat(6, minmax(110px, 1fr)); gap: 12px; }
+    .diagnostic-item span { display: block; color: var(--muted); font-size: 11px; }
+    .diagnostic-item strong { display: block; margin-top: 2px; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+    .variant-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 8px;
+    }
+    .variant-summary-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .72);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .variant-summary-item strong { color: var(--text); }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 0;
+      margin: 8px 0 18px;
+      overflow-x: auto;
+      padding: 14px 12px 12px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .025), 0 8px 24px rgba(0,0,0,.018);
+      counter-reset: workflow-step;
+    }
+    .workflow-intro {
+      display: flex;
+      align-items: baseline;
+      min-width: 0;
+      gap: 10px;
+      margin: 10px 2px 0;
+    }
+    .workflow-intro strong { min-width: 0; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+    .workflow-intro span { color: var(--accent); font-size: 11px; font-weight: 650; }
+    .workflow-intro p { min-width: 0; margin: 0; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+    .stage {
+      position: relative;
+      min-height: 66px;
+      padding: 29px 10px 4px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      counter-increment: workflow-step;
+    }
+    .stage::before {
+      content: counter(workflow-step);
+      position: absolute;
+      top: 0;
+      left: 10px;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 650;
+    }
+    .stage::after {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 38px;
+      width: calc(100% - 34px);
+      height: 1px;
+      background: var(--line-strong);
+    }
+    .stage:last-child::after { display: none; }
+    .stage b { display: block; font-size: 13px; }
+    .stage span { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .stage.later {
+      color: var(--muted);
+    }
+    .stage.later::before { background: var(--soft); color: #86868b; }
+    .stage.later::after { background: none; border-top: 1px dashed var(--line-strong); }
+    .layout {
+      display: block;
+      margin-top: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 0;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 10px 30px rgba(0, 0, 0, .025);
+    }
+    .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 3px 7px;
+      font-size: 12px;
+      background: #f2f2f4;
+      border: 0;
+      color: var(--text);
+    }
+    .badge.ok { background: var(--green-soft); color: #1d6f34; }
+    .badge.warn { background: var(--amber-soft); color: #7a4b00; }
+    .badge.fail { background: var(--red-soft); color: #9f2118; }
+    .badge.soft { background: var(--accent-soft); color: #075ea9; }
+    #summary > .badges { margin: 0 2px 10px; }
+    #summary > .badges .badge { background: rgba(255,255,255,.72); color: var(--muted); }
+    #summary > .badges .badge.ok { color: #1d6f34; }
+    #summary > .badges .badge.warn { color: #7a4b00; }
+    #summary > .badges .badge.soft { color: #075ea9; }
+    .identity-strip { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 16px; padding: 2px 2px 12px; border-bottom: 1px solid var(--line); }
+    .identity-main { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 9px; }
+    .identity-main > img { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; background: var(--soft); }
+    .identity-main h2 { margin: 0 0 2px; font-size: 17px; line-height: 1.2; }
+    .identity-main p { margin: 0; color: var(--muted); font-size: 12px; }
+    .identity-status { display: flex; min-width: 0; flex-wrap: wrap; justify-content: flex-end; gap: 10px; color: var(--muted); font-size: 12px; }
+    .identity-status .badge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 18px;
+      margin: 12px -2px 0;
+      padding: 9px 2px 8px;
+      overflow-x: auto;
+      background: rgba(255, 255, 255, .96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+    .tabs button { position: relative; flex: 0 0 auto; border: 0; background: transparent; color: var(--muted); border-radius: 0; padding: 7px 1px; }
+    .tabs button:hover { background: transparent; color: var(--text); }
+    .tabs button.active { background: transparent; color: var(--text); font-weight: 600; box-shadow: none; }
+    .tabs button.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -9px; height: 2px; border-radius: 2px; background: var(--accent); }
+    .tab-content {
+      min-height: 300px;
+      padding: 14px 4px 4px;
+    }
+    .two-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+    .three-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .tab-content > .two-col > section,
+    .tab-content > .three-col > section { border: 0; border-radius: 8px; padding: 13px; background: #f8f8fa; min-width: 0; }
+    .preview-button {
+      position: relative;
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0;
+      background: var(--soft);
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+    .preview-button:hover { border-color: #9ecbfa; box-shadow: 0 0 0 3px var(--accent-soft); }
+    .preview-button img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .zoom-hint {
+      position: absolute;
+      left: 6px;
+      bottom: 6px;
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: rgba(23, 26, 21, .72);
+      color: #fff;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity .15s ease;
+    }
+    .preview-button:hover .zoom-hint, .preview-button:focus-visible .zoom-hint { opacity: 1; }
+    .figure .preview-button { width: 100%; aspect-ratio: 1 / 1; border: 0; border-radius: 0; }
+    h3 { margin: 0 0 10px; font-size: 16px; }
+    h4 { margin: 12px 0 6px; font-size: 13px; color: var(--muted); text-transform: none; }
+    .kv { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .kv th, .kv td { border-bottom: 1px solid var(--line); padding: 6px 7px; vertical-align: top; text-align: left; }
+    .kv th { width: 34%; color: var(--muted); font-weight: 600; }
+    .kv td { overflow-wrap: anywhere; word-break: break-word; }
+    .list { margin: 0; padding-left: 18px; }
+    .list li { margin: 4px 0; }
+    pre {
+      white-space: pre-wrap;
+      overflow: auto;
+      max-height: 320px;
+      margin: 0;
+      padding: 12px;
+      background: #f7f7f9;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .prompt-actions { display: flex; gap: 8px; margin-bottom: 8px; }
+    .image-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .reference-strip { display: flex; gap: 12px; overflow-x: auto; padding: 2px 2px 8px; }
+    .reference-strip .figure { flex: 0 0 min(320px, 42vw); }
+    .embedded-reference { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .embedded-reference h4 { margin-top: 0; }
+    .embedded-reference .reference-strip { padding-bottom: 2px; }
+    .embedded-reference .figure { flex-basis: 100%; max-width: 260px; }
+    .figure {
+      border: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f5f5f7;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+    .figure img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f5f5f7; }
+    .figure figcaption { padding: 8px 10px; color: var(--muted); font-size: 12px; }
+    .review-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 18px; align-items: start; }
+    .media-deck { display: grid; grid-template-columns: minmax(320px, 1.5fr) repeat(2, minmax(180px, .75fr)); gap: 10px; min-width: 0; }
+    .media-tile { min-width: 0; overflow: hidden; border-radius: 10px; background: #fafafa; box-shadow: inset 0 0 0 1px var(--line); }
+    .media-tile .preview-button { width: 100%; aspect-ratio: 1 / 1; border: 0; border-radius: 0; }
+    .media-tile video { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f0f0f2; }
+    .media-caption { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 8px 10px; border-top: 1px solid var(--line); }
+    .media-caption strong { display: block; font-size: 12px; font-weight: 600; }
+    .media-caption span { display: block; color: var(--muted); font-size: 11px; }
+    .media-empty { display: grid; place-items: center; aspect-ratio: 1 / 1; color: var(--muted); font-size: 12px; }
+    .decision-rail { padding: 2px 0 0 16px; border-left: 1px solid var(--line); }
+    .decision-rail h3 { margin-bottom: 4px; }
+    .decision-rail .note { margin-bottom: 12px; }
+    .decision-list { margin: 0; }
+    .review-context { margin-top: 14px; padding: 14px; border-radius: 10px; background: #fafafa; box-shadow: inset 0 0 0 1px var(--line); }
+    .review-context-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .review-context-head h3 { margin: 0 0 3px; }
+    .review-context-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .display-only-label { flex: 0 0 auto; padding: 4px 7px; border-radius: 999px; background: var(--accent-soft); color: #075ea9; font-size: 11px; font-weight: 600; }
+    .review-context-profile { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .review-context-avatar, .review-context-avatar img { width: 72px; height: 72px; border-radius: 10px; }
+    .review-context-avatar { overflow: hidden; background: var(--soft); }
+    .review-context-avatar img { object-fit: cover; }
+    .review-context-copy { min-width: 0; }
+    .review-context-copy strong { display: block; margin-bottom: 4px; font-size: 14px; }
+    .review-context-copy p { margin: 4px 0; color: var(--muted); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .review-stickers { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 8px; margin-top: 12px; }
+    .review-sticker { min-width: 0; margin: 0; overflow: hidden; border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+    .review-sticker .preview-button { width: 100%; aspect-ratio: 1 / 1; border: 0; border-radius: 9px 9px 0 0; }
+    .review-sticker figcaption { padding: 7px 8px 9px; color: var(--muted); font-size: 11px; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+    .decision-row { display: grid; grid-template-columns: 98px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .decision-row dt { color: var(--muted); font-size: 12px; font-weight: 500; }
+    .decision-row dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+    .developer-stack { display: grid; gap: 10px; }
+    .developer-stack details { margin: 0; }
+    .variant-thumbs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .variant-thumb { min-width: 0; }
+    .variant-thumb .preview-button { width: 100%; aspect-ratio: 1 / 1; }
+    .variant-label { margin-top: 3px; color: var(--muted); font-size: 11px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .candidate-list {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(220px, 280px);
+      grid-template-rows: 1fr;
+      gap: 8px;
+      margin: 8px 0 14px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .candidate {
+      border: 0;
+      border-radius: 8px;
+      padding: 8px;
+      background: #f5f5f7;
+    }
+    .candidate b, .candidate span, .candidate small {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+    .candidate span { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .candidate small { color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.35; }
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(10, 12, 10, .82);
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-panel {
+      width: min(92vw, 1120px);
+      max-height: 92vh;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: #11140f;
+      color: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+    .lightbox-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.14);
+    }
+    .lightbox-title { font-weight: 700; overflow-wrap: anywhere; }
+    .lightbox-close {
+      border-color: rgba(255,255,255,.28);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+    }
+    .lightbox-body {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      background: #050604;
+    }
+    .lightbox-body img {
+      max-width: 100%;
+      max-height: calc(92vh - 58px);
+      object-fit: contain;
+      display: block;
+    }
+    details { border: 1px solid var(--line); border-radius: 8px; background: #fbfbfd; margin-top: 8px; }
+    details summary { cursor: pointer; padding: 8px 10px; color: var(--text); font-weight: 650; }
+    details > pre, details > .details-body { border: 0; border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
+    .gallery {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+      gap: 8px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,.035), 0 7px 20px rgba(0,0,0,.025);
+      transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    .card:hover { border-color: #c7ddf5; box-shadow: 0 4px 18px rgba(0, 86, 180, .08); transform: translateY(-1px); }
+    .card.active { border-color: #82baf2; box-shadow: 0 0 0 3px var(--accent-soft), 0 5px 18px rgba(0, 86, 180, .08); }
+    .card-select {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 7px;
+      padding: 5px 3px 2px;
+      border: 0;
+      background: transparent;
+      text-align: left;
+    }
+    .card-select:hover, .card-select.active { border: 0; background: transparent; }
+    .card-avatar, .card-avatar img { width: 30px; height: 30px; border-radius: 7px; }
+    .card-avatar { display: grid; place-items: center; overflow: hidden; background: var(--soft); color: var(--muted); font-size: 10px; }
+    .card-avatar img { display: block; object-fit: cover; }
+    .card-copy { min-width: 0; }
+    .thumbs { position: relative; }
+    .thumbs img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: var(--soft); border-radius: 6px; border: 1px solid var(--line); }
+    .thumbs > .preview-button { width: 100%; aspect-ratio: 1 / 1; border-radius: 6px; }
+    .thumbs > .preview-button img { border: 0; border-radius: 6px; }
+    .mini-thumb { position: absolute; right: 5px; bottom: 5px; width: 34%; background: var(--panel); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+    .mini-thumb img { display: block; border-radius: 6px; }
+    .gallery-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
+    .gallery-heading h2 { margin: 0; font-size: 16px; }
+    .gallery-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+    .gallery-controls {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      min-width: min(560px, 52vw);
+    }
+    .mode-toggle { display: inline-flex; gap: 6px; justify-content: flex-end; }
+    .mode-toggle button, .pager button { padding: 5px 8px; font-size: 12px; }
+    .pager-wrap { display: grid; gap: 4px; justify-items: end; }
+    .pager {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 5px;
+    }
+    .pager button {
+      width: 30px;
+      min-width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 50%;
+      line-height: 1;
+    }
+    .pager button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .range-text { color: var(--muted); font-size: 12px; }
+    .missing-thumb {
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1 / 1;
+      background: var(--soft);
+      border-radius: 6px;
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .card-title { display: block; margin: 0 0 3px; font-weight: 620; font-size: 12px; overflow-wrap: anywhere; min-height: 34px; }
+    .card-meta { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; min-height: 18px; overflow-wrap: anywhere; }
+    .card-status { display: inline-flex; align-items: center; white-space: nowrap; }
+    .gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 168px)); }
+    .creator-card { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 7px; min-height: 64px; }
+    .creator-card-avatar img, .creator-card-avatar .missing-thumb { width: 30px; height: 30px; min-height: 30px; aspect-ratio: 1; object-fit: cover; border-radius: 7px; }
+    .creator-card-copy { min-width: 0; }
+    .creator-card .card-title { min-height: 0; margin: 0 0 4px; font-size: 11px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+    .creator-card .card-meta { gap: 5px; font-size: 10px; }
+    .creator-card .status-dot { width: 6px; height: 6px; }
+    .path { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .note { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+    .empty { color: var(--muted); padding: 16px; border: 1px dashed var(--line); border-radius: 8px; }
+    .lineage-controls { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 2px 0 10px; }
+    .lineage-controls h3 { margin: 0 0 2px; font-size: 15px; }
+    .lineage-controls p { margin: 0; color: var(--muted); font-size: 11px; }
+    .focus-group, .utility-group { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .focus-label { color: var(--muted); font-size: 11px; margin-right: 2px; }
+    .focus-button.active, .language-button.active { color: #075ea9; background: var(--accent-soft); border-color: #b9d9fb; }
+    .lineage-timeline { display: block; overflow-x: auto; padding: 12px; }
+    .lineage-flow { display: grid; grid-template-columns: repeat(5, minmax(135px, 1fr)); min-width: 760px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fafafa; }
+    .flow-node { position: relative; display: grid; grid-template-columns: 22px minmax(0,1fr); grid-template-rows: auto auto; column-gap: 8px; min-width: 0; min-height: 68px; padding: 10px 12px; text-align: left; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; transition: background .15s ease, box-shadow .15s ease; }
+    .flow-node:last-child { border-right: 0; }
+    .flow-node:hover { background: #fff; }
+    .flow-node.active { background: #fff; box-shadow: inset 0 -2px var(--accent); }
+    .flow-node .step-index { grid-row: 1 / span 2; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #eceef1; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .flow-node.active .step-index { color: #075ea9; background: var(--accent-soft); }
+    .flow-node .step-title { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-width: 0; font-size: 12px; font-weight: 650; }
+    .flow-node .step-title > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .flow-node small { align-self: end; overflow: hidden; color: var(--muted); font-size: 10px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+    .node-meta { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+    .node-owner { color: var(--muted); font-size: 10px; }
+    .node-source { margin-top: 8px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+    .branch-note { display: block; margin-top: 7px; padding: 5px 6px; border-radius: 5px; background: #f5f0ff; color: #6b42a2; font-size: 10px; }
+    .lineage-detail { display: grid; gap: 14px; }
+    .delivery-fixed { padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .delivery-fixed .media-deck { grid-template-columns: minmax(260px, 1.2fr) repeat(2, minmax(170px, .75fr)); }
+    .inspector-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .inspector-head h2 { margin: 0 0 3px; font-size: 18px; }
+    .inspector-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .inspector-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+    .record-detail { margin-top: 12px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .record-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .record-detail-head h3 { margin: 0; font-size: 15px; }
+    .record-detail-head p { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+    .record-detail-body { display: grid; grid-template-columns: minmax(230px,.72fr) minmax(0,1.55fr); min-height: 260px; }
+    .record-context, .record-output { min-width: 0; padding: 14px; }
+    .record-context { border-right: 1px solid var(--line); background: #fafafa; }
+    .record-pane-title { margin: 0 0 8px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .record-next { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); background: #fafafa; }
+    .record-next > strong { flex: 0 0 auto; color: var(--muted); font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+    .record-next .lineage-card { flex: 1; margin: 0; padding: 0; background: transparent; box-shadow: none; }
+    .record-next .lineage-card h4 { display: none; }
+    .record-next .list { display: flex; flex-wrap: wrap; gap: 5px 16px; padding: 0; list-style: none; }
+    .record-next .list li { margin: 0; color: var(--muted); font-size: 11px; }
+    .token-group + .token-group { margin-top: 10px; }
+    .token-group > strong { display: block; margin-bottom: 5px; color: var(--muted); font-size: 10px; font-weight: 650; }
+    .token-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .token-list span { padding: 3px 6px; border-radius: 5px; background: #f1f2f4; color: #555b63; font-size: 10px; overflow-wrap: anywhere; }
+    .token-list.discard span { background: #f7f3ef; color: #7b5b3c; }
+    .lineage-card { margin-top: 8px; padding: 10px; border-radius: 7px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); overflow-wrap: anywhere; }
+    .record-context .lineage-card, .record-output .lineage-card { margin-top: 8px; }
+    .lineage-card h4 { margin: 0 0 5px; color: var(--text); }
+    .lineage-card p { margin: 4px 0; font-size: 12px; }
+    .lineage-card .muted { color: var(--muted); }
+    .slot-row { display: grid; grid-template-columns: minmax(120px,.7fr) minmax(0,1.3fr) auto; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .slot-row:last-child { border-bottom: 0; }
+    .slot-row code { color: #075ea9; font-size: 11px; }
+    .slot-evidence { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .evidence-symbol { padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .evidence-symbol:last-child { border-bottom: 0; }
+    .evidence-symbol strong { font-size: 12px; }
+    .evidence-symbol p { margin: 3px 0; }
+    .branch-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .branch-card { padding: 12px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+    .branch-card.planb { background: #fbf8ff; }
+    .branch-card h3 { font-size: 14px; }
+    .bypass-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0; }
+    .drawer-backdrop { position: fixed; inset: 0; z-index: 1090; display: none; background: rgba(0,0,0,.28); }
+    .drawer-backdrop.open { display: block; }
+    .contract-drawer { position: fixed; top: 0; right: 0; z-index: 1100; width: min(760px, 92vw); height: 100vh; padding: 18px; overflow: auto; background: #fff; box-shadow: -20px 0 60px rgba(0,0,0,.16); transform: translateX(102%); transition: transform .2s ease; }
+    .contract-drawer.open { transform: translateX(0); }
+    .drawer-head { position: sticky; top: -18px; z-index: 2; display: flex; justify-content: space-between; gap: 12px; padding: 18px 0 12px; background: #fff; border-bottom: 1px solid var(--line); }
+    .drawer-head h2 { margin: 0; }
+    .drawer-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .drawer-body { padding-top: 10px; }
+    .contract-card { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .contract-card h3 { margin: 0 0 7px; }
+    .contract-card code { color: #075ea9; }
+    @media (max-width: 1350px) {
+      .diagnostic-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .topbar { align-items: flex-start; }
+      .run-context { flex-basis: 100%; }
+    }
+    @media (max-width: 1100px) {
+      .topbar { display: block; }
+      .topbar-actions, .run-context { justify-content: flex-start; }
+      .topbar-actions { margin-top: 10px; }
+      .timeline { grid-template-columns: repeat(5, minmax(150px, 1fr)); }
+      .layout { grid-template-columns: 1fr; }
+      .gallery-heading { align-items: stretch; flex-direction: column; }
+      .gallery-controls { grid-template-columns: 1fr; min-width: 0; width: 100%; }
+      .mode-toggle, .pager, .pager-wrap { justify-content: flex-start; justify-items: start; }
+      .review-workspace { grid-template-columns: 1fr; }
+      .decision-rail { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+      .media-deck { grid-template-columns: minmax(280px, 1.35fr) repeat(2, minmax(160px, .8fr)); }
+      .delivery-fixed .media-deck { grid-template-columns: minmax(240px, 1fr) repeat(2, minmax(150px,.8fr)); }
+    }
+    @media (max-width: 680px) {
+      .page { width: 100%; max-width: 100%; padding: 14px; }
+      .topbar { display: block; }
+      .topbar-actions { justify-content: flex-start; margin-top: 10px; }
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .diagnostic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .run-context { justify-content: flex-start; margin-top: 10px; }
+      .identity-strip { align-items: flex-start; flex-direction: column; }
+      .identity-main, .identity-status { width: 100%; min-width: 0; }
+      .identity-status { justify-content: flex-start; }
+      .identity-main { grid-template-columns: 32px minmax(0, 1fr); }
+      .identity-main > img { width: 32px; height: 32px; }
+      .two-col, .three-col, .image-row { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: 1fr; overflow: visible; padding: 10px 12px; }
+      .workflow-intro { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .stage { min-height: 52px; padding: 4px 8px 8px 42px; }
+      .stage::before { top: 4px; left: 4px; }
+      .stage::after { top: 28px; left: 14px; width: 1px; height: calc(100% - 22px); }
+      .gallery { grid-template-columns: minmax(0, 1fr); }
+      .card, .variant-thumbs, .variant-thumb, .preview-button { min-width: 0; max-width: 100%; }
+      .variant-thumb img { min-width: 0; max-width: 100%; }
+      .tab-content { max-height: none; overflow: visible; }
+      .reference-strip .figure { flex-basis: 78vw; }
+      .layout, .panel, #detail, .tab-content, .review-workspace, .media-deck, .media-tile, .review-context { width: 100%; min-width: 0; max-width: 100%; }
+      .panel { padding: 12px; }
+      .media-deck { grid-template-columns: 1fr; }
+      .media-tile.primary { order: -1; }
+      .review-context-profile { grid-template-columns: 56px minmax(0, 1fr); }
+      .review-context-avatar, .review-context-avatar img { width: 56px; height: 56px; }
+      .review-stickers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .lineage-controls, .inspector-head { align-items: stretch; flex-direction: column; }
+      .focus-group, .utility-group { width: 100%; min-width: 0; }
+      .focus-label { flex-basis: 100%; }
+      .utility-group, .inspector-actions { justify-content: flex-start; }
+      .lineage-flow { min-width: 0; grid-template-columns: 1fr; border-radius: 8px; }
+      .flow-node { min-height: 54px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .flow-node:last-child { border-bottom: 0; }
+      .flow-node.active { box-shadow: inset 2px 0 var(--accent); }
+      .record-detail-body, .branch-grid { grid-template-columns: 1fr; }
+      .record-context { border-right: 0; border-bottom: 1px solid var(--line); }
+      .delivery-fixed .media-deck { grid-template-columns: 1fr; }
+      .slot-row { grid-template-columns: 1fr; }
+      .gallery { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="title">
+        <h1 id="pageTitle">Community Gift Review</h1>
+        <p id="pageSubtitle">Review final assets and the accepted-input generation record.</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="run-context" id="runContext"></div>
+        <nav class="view-tabs" aria-label="Viewer mode">
+          <a class="view-tab" id="showcaseLink" href="index.html">礼物预览</a>
+          <span class="view-tab active" id="reviewTabLabel" aria-current="page">结果审核台</span>
+          <a class="view-tab" id="workflowLink" href="workflow.html">工作流画布</a>
+        </nav>
+        <button class="utility-button" id="contractOpen" type="button">Fields</button>
+        <div class="lang-switch" aria-label="Language">
+          <button class="lang-button active" data-review-lang="zh" type="button" aria-pressed="true">中文</button>
+          <button class="lang-button" data-review-lang="en" type="button" aria-pressed="false">EN</button>
+        </div>
+      </div>
+    </header>
+    <section id="summary"></section>
+    <section id="timeline"></section>
+    <section class="gallery-heading">
+      <div>
+        <h2>Gift Selection</h2>
+        <p>Select a host to review all gift assets and key decisions.</p>
+      </div>
+      <div class="gallery-controls">
+        <div class="mode-toggle" aria-label="礼物显示模式">
+          <button id="pagedMode" type="button" aria-pressed="true">每页 10 个</button>
+          <button id="allMode" type="button" aria-pressed="false">全部展开</button>
+        </div>
+        <div class="pager-wrap">
+          <nav id="pager" class="pager" aria-label="礼物分页"></nav>
+          <div id="galleryRange" class="range-text"></div>
+        </div>
+      </div>
+    </section>
+    <section id="gallery" class="gallery"></section>
+    <section class="layout">
+      <main class="panel" id="detail"></main>
+    </section>
+  </div>
+  <div class="drawer-backdrop" id="contractBackdrop" aria-hidden="true"></div>
+  <aside class="contract-drawer" id="contractDrawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="contractTitle" tabindex="-1" inert>
+    <div class="drawer-head">
+      <div><h2 id="contractTitle">Field Contract</h2><p id="contractSubtitle"></p></div>
+      <button id="contractClose" type="button">关闭</button>
+    </div>
+    <div class="drawer-body" id="contractBody"></div>
+  </aside>
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-panel" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" tabindex="-1">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lightboxTitle"></div>
+        <button class="lightbox-close" id="lightboxClose" type="button">关闭</button>
+      </div>
+      <div class="lightbox-body">
+        <img id="lightboxImage" alt="">
+      </div>
+    </div>
+  </div>
+  <script id="workflow-data" type="application/json">{"viewer_data_version":3,"summary":{"run_id":"demo-viewer-template","run_dir":"","retry_run_dir":"","streamers_dir":"","assets_dir":"","total_rows":1,"clean_success_rows":0,"handheld_success_rows":0,"retry_succeeded_rows":0,"creative_llm_failed_rows":0,"color_fallback_rows":0,"color_filtered_rows":0,"color_design_filled_rows":0,"chroma_remapped_rows":0,"chroma_screen_counts":{"green_screen":46,"magenta_screen":3,"blue_screen":1},"chroma_conflict_rows":0,"reference_unique_count":0,"reference_top_id":"hat_mv_silver","reference_top_count":0,"reference_top_share":0.1,"reference_concentration_risk":false,"reference_semantic_rows":0,"reference_style_only_rows":0,"reference_fallback_rows":0,"provider":"gpt_image_2","scene_template":"blue_screen, green_screen, magenta_screen","output_mode":"one_step_handheld_chroma","input_contract":"design_slots_v1","prompt_flow_counts":{"one_step_handheld_chroma":50},"compare_enabled":true,"planb_enabled":true,"planb_run_dir":"","planb_label":"PlanB 经典方案","ab_compare_enabled":false,"compare_run_dir":"","run_label":"Mainline 定制方案","compare_label":"PlanB 经典方案","variant_summaries":[{"label":"Mainline 定制方案","total_rows":50,"final_success_rows":50,"providers":["gpt_image_2"],"status_counts":{"succeeded":50},"visual_alt_rows":0,"fallback_template_rows":0},{"label":"PlanB 经典方案","total_rows":50,"final_success_rows":50,"providers":["gpt_image_2"],"status_counts":{"succeeded":50},"visual_alt_rows":0,"fallback_template_rows":0}],"video_run_dir":"","review_context_enabled":true,"review_context_rows":1,"review_context_stickers":721,"showcase_copy_rows":1,"matting_run_enabled":false,"matting_complete_branches":0,"video_success_rows":0,"video_failed_rows":0,"pak_input_rows":1,"slot_complete_rows":1},"workflow_nodes":[{"id":"pak_input","owner":"pak","title_zh":"Pak JSON","title_en":"Pak JSON","description_zh":"只接收生成所需字段；reason、证据和媒体不进入设计工作流","description_en":"Accepts generation fields only; reasons, evidence, and media never enter the design workflow"},{"id":"design_slots","owner":"pak","title_zh":"Design Slots 标准化","title_en":"Design Slots normalization","description_zh":"字段映射与 schema 校验，不重新推测设计","description_en":"Field mapping and schema validation without re-inferring the design"},{"id":"creative_llm","owner":"design","title_zh":"创意 LLM","title_en":"Creative LLM","description_zh":"只扩写轮廓、融合、材质落位与握柄","description_en":"Expands silhouette, fusion, material application, and handle"},{"id":"routing","owner":"design","title_zh":"路由与安全编译","title_en":"Routing & safety compile","description_zh":"颜色、材质、Reference、Chroma 与 provider 决策","description_en":"Color, material, reference, chroma, and provider decisions"},{"id":"prompt_compile","owner":"design","title_zh":"最终 Prompt","title_en":"Final prompts","description_zh":"主线 Prompt 与 PlanB Prompt 的真实模型输入","description_en":"Actual model inputs for the mainline and PlanB branches"}],"field_contract":[{"field":"anchor_id","type":"string","required":true,"owner":"Pak Data Mining","fallback":"none; duplicate or empty IDs fail preflight","fallback_zh":"无兜底；重复或空 ID 在预检阶段失败","consumers":["static manifest","video manifest","Viewer"],"consumers_zh":["静态 manifest","视频 manifest","Viewer"],"example":"118930683485462528"},{"field":"exact_text","type":"{text}","required":true,"owner":"Pak Data Mining","fallback":"Pak must deliver a final value; fan club name then host name may be resolved upstream","fallback_zh":"Pak 必须交付最终值；上游可按粉丝团名、主播名顺序完成解析","consumers":["creative lock","mainline prompt","PlanB prompt"],"consumers_zh":["创意锁定输入","主线 Prompt","PlanB Prompt"],"example":"CHEMIST3"},{"field":"primary_object","type":"{name, strength}","required":true,"owner":"Pak Data Mining","fallback":"none; Pak must deliver a non-empty final value","fallback_zh":"无兜底；Pak 必须交付非空最终值","consumers":["Creative LLM","reference routing","mainline prompt"],"consumers_zh":["创意 LLM","Reference 路由","主线 Prompt"],"example":"猫耳"},{"field":"secondary_object","type":"{name, strength}","required":true,"owner":"Pak Data Mining","fallback":"none; Pak must deliver a non-empty final value","fallback_zh":"无兜底；Pak 必须交付非空最终值","consumers":["Creative LLM","reference routing","mainline prompt"],"consumers_zh":["创意 LLM","Reference 路由","主线 Prompt"],"example":"护片"},{"field":"palette","type":"primary_color + secondary_color + accent_colors[]","required":true,"owner":"Pak Data Mining","fallback":"required from Pak; all product black routes to deep graphite gray; explicit oversaturation is softened","fallback_zh":"Pak 必填；所有产品黑色统一路由为深石墨灰；明确过饱和描述做同色相软化","consumers":["color audit","material/color library","mainline and PlanB palette"],"consumers_zh":["颜色审计","材质/颜色库","主线与 PlanB Palette"],"example":"莓酒红 / 霓虹紫 / [柔白, 暖金]"},{"field":"materials","type":"object","required":true,"owner":"Pak Data Mining","fallback":"none; Pak must deliver all three material roles","fallback_zh":"无兜底；Pak 必须交付三个材料角色","consumers":["material safety compiler","mainline prompt"],"consumers_zh":["材料安全编译器","主线 Prompt"],"example":"glossy_resin / matte_rubber / brushed_metal_trim"}],"items":[{"key":"demo-row-001","row_id":1,"anchor_id":"0000000000000000001","host_name":"Demo Creator","community_name":"Demo Community","input_contract":"design_slots_v1","design_slots":{"anchor_id":"0000000000000000001","exact_text":"Demo Club","primary_object":"tiger","secondary_object":"strawberry","primary_color":"purple","secondary_color":"orange","accent_colors":["cyan","black"],"materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"}},"design_slots_delivery":{"anchor_id":"0000000000000000001","exact_text":{"text":"Demo Club"},"primary_object":{"name":"tiger","strength":"high"},"secondary_object":{"name":"strawberry","strength":"medium"},"primary_color":{"name":"purple","strength":"high"},"secondary_color":{"name":"orange","strength":"medium"},"accent_colors":[{"name":"cyan","strength":"medium"},{"name":"black","strength":"medium"}],"materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"}},"inputs":{"folder":"<local-path-omitted>","avatar_path":"<local-path-omitted>","avatar_asset":""},"vision":{"path":"","source":"host_vision","palette":{"family":"Design Slots 锁定配色","main_color":"purple","secondary_color":"orange","accent_colors":["cyan","black"],"tags":[]},"materials":{"main":"","supporting":"","tags":[]},"material_application":"glossy_resin用于灯头主体外轮廓与主要鼓起结构，形成饱满兽首感与果实般通透鼓面；matte_rubber用于握柄包覆、防滑分区、局部转折过渡与底盖触感区，使手持稳定且削弱灯头与握柄连接处的生硬感；soft_emissive_panel嵌入灯头正面核心发光区、耳缘内侧小面积导光区以及与次物象相关的籽点/切片感细节中，形成分区发光而非整块泛白。","text":{"exact_text":"Demo Club","source":"design_slots","script":"latin","style_hint":"“Demo Club”采用圆润微爪痕感字形，文字不外扩成独立物象，沿正面下缘或握柄上段竖向排布；整体为柔和发光描边配局部高亮面，字面可用低饱和冷光衬托，避免抢过主体轮廓。"},"lamp_head_silhouette":"灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。","silhouette_language":"圆润、饱满、对称、幼态兽感中带果实弹性，避免尖刺和过细悬挑，以大曲面和浅层浮雕建立主次层级。","signature_symbols":{"primary":"tiger","secondary":"strawberry","source":"design_slots"},"theme_forms":{"primary":{"symbol":"tiger","position":"灯头上半部居中主导","forms":["以简化虎首为主轮廓，头顶略宽、下缘收拢，形成稳定可制造的识别外形","双耳做成圆角三角突起，控制厚度避免过尖","额头与两侧用浅浮雕条纹表达兽感，不增加新主题","脸部不做人脸写实，仅保留抽象兽面分区与对称结构"]},"secondary":{"symbol":"strawberry","position":"包裹灯头下半部并向连接段过渡","forms":["以下宽上收的草莓果身曲线补足虎首下缘，使整体从上部兽首自然过渡到下部果形","表面用均匀浅凹籽点作为次级纹理，控制在边缘和下半区，不压过虎纹","顶部叶冠可简化为连接虎首下缘的包托结构，不独立长出第三主题感","果实鼓面可作为主要透光基底，让主体更有甜感和体量"]},"fusion_note":"整体采用“上虎下莓”的一体化结构：虎首负责识别性轮廓，草莓负责下半部体积与甜感纹理，二者通过共同的圆润外缘与连续曲面融合，避免像两个部件硬拼。"},"style_pitch":"甜酷果兽感","lighting":"主发光集中在灯头正面中央至下半部，形成均匀果冻感面光；耳内侧与少量籽点细节做次级点状或短条导光，增强层次；边缘保留一定非发光区，让虎耳、虎纹和草莓籽点在亮起与熄灭时都清晰可辨。整体建议冷暖对比弱化，保持梦幻甜酷而不过分刺眼。","mood":{"phrase":"奶凶甜闪","tags":["可爱","甜酷","果冻感","轻潮玩"]},"handle":{"main_material":"matte_rubber","surface_treatment":"细磨砂防滑，主杆保持简洁直筒并在上段做轻微收腰，便于单手握持；可加入浅凹环纹提升抓握稳定性。","connector_detail":"连接段以短颈过渡至灯头，下宽上窄的圆角套环结构包覆接口，视觉上承接草莓下缘并隐藏装配缝。","bottom_cap":"底盖做圆角胶囊形收尾，略微外扩防滑落，可保留低调发光点或非发光压纹，不另起新主题造型。","decoration_continuation":"握柄装饰延续灯头的虎纹/草莓籽点语言，但仅以浅压纹或窄环带出现；靠近上段可呼应主体的条纹节奏，下段则更简洁，确保文字与主体仍是视觉核心。"},"image_source":"text_only","final_symbols":{"primary":"tiger","secondary":"strawberry"}},"host_brief":{"path":"","summary":{"row_id":1,"host_name":"Demo Creator 🐅","community_name":"Demo Club","symbols_raw":["tiger","strawberry"],"primary_symbol":"tiger","secondary_symbol":"strawberry","symbol_resolution_trace":[{"source_symbol":"tiger","canonical_object":"tiger","canonical_objects":["tiger"],"source_type":"pak_top","status":"resolved","evidence":["design_slots.primary_object"],"reason":"locked Design Slots consensus","accepted":true,"accepted_objects":["tiger"]},{"source_symbol":"strawberry","canonical_object":"strawberry","canonical_objects":["strawberry"],"source_type":"pak_top","status":"resolved","evidence":["design_slots.secondary_object"],"reason":"locked Design Slots consensus","accepted":true,"accepted_objects":["strawberry"]}],"slot_selection_source":"pak_top_direct","slot_fallback_used":false,"primary_color":"purple","_truncated":true}},"route":{"creative_llm":{"source":"creative_llm","input_mode":"text_only","prompt_injected":true,"error":""},"color":{"palette_id":"design_slots_bounded_safety","fallback_used":false,"input_primary_color":"purple","input_secondary_color":"orange","color_source":"pak_design_slots","color_audit_status":"bounded_safety_compile","audited_primary_color":"purple","audited_secondary_color":"orange","accent_colors":["cyan","deep graphite gray"],"rejected_colors":[],"color_policy_reason":"preserve order and hue; soften only absolute black or explicit oversaturation","chroma_policy_applied":false,"chroma_unsafe_colors":[],"chroma_safe_replacements":[],"chroma_policy_reason":"","reason":"formal Design Slots compile directly through bounded color safety"},"shape":{"matched_rule_id":"default","silhouette":"iconic sculpted lamp head","reason":"no shape rule matched; using defaults"},"reference":{"reference_id":"basketball_tiger_sport","reference_rule":"semantic_weighted_top_n","score":"","matched_tags":{},"matched_dimensions":[],"specific_matched_tags":{},"generic_matched_tags":{},"match_strength":"","reference_policy_reason":"","top_candidates":[{"id":"basketball_tiger_sport","score":4.66,"match_strength":"semantic","specific_matched_tags":{"shape":["tiger"],"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin"]},"reference_policy_reason":"Specific semantic evidence is strong enough for this reference."},{"id":"cat_maru_paw_glow","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["purple"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."},{"id":"fire_plush_torch","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."},{"id":"sticker_ghost_soft","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["purple"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."}],"fallback_used":false},"material":{"material_source":"pak_input","original_materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"},"final_materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"},"prompt_terms":["柔亮不透明树脂主体","亲肤哑光软橡胶辅件","小面积柔光发光内芯，配不透明背板"],"safety_remap":{},"remap_reasons":[],"accent_coverage":"small","opaque_backing":true,"solid_outer_edge":false,"transparency_risk_check":{"status":"passed","issues":[]},"material_pair":"柔亮不透明树脂主体、亲肤哑光软橡胶辅件、小面积柔光发光内芯，配不透明背板","main_material":"柔亮不透明树脂主体","supporting_material":"亲肤哑光软橡胶辅件","accent_material":"小面积柔光发光内芯，配不透明背板","material_family_main":"opaque_resin","material_family_supporting":"soft_rubber","material_profile":"pak_soft_locked","material_policy_reason":"Pak material IDs are soft-locked; only invalid-role and explicit transparency safety rules may adjust them"},"design_slot_safety":{"objects":{"primary":{"original_object":"tiger","final_object":"tiger","changed":false,"reason":"pak_object_passthrough"},"secondary":{"original_object":"strawberry","final_object":"strawberry","changed":false,"reason":"pak_object_passthrough"}},"palette":{"original_colors":["purple","orange","cyan","black"],"final_colors":["purple","orange","cyan","deep graphite gray"],"adjustments":[{"original":"black","final":"deep graphite gray","reason":"black_routed_to_deep_graphite_gray"}],"warnings":[],"policy":"preserve_order_and_hue; route_all_black_to_deep_graphite_gray; soften_explicit_oversaturation"},"warnings":[]},"candidate":{"candidate_mode":"","original_primary_symbol":"","original_secondary_symbol":"","visual_alt_source":"","effective_primary_symbol":"","effective_secondary_symbol":"","candidate_policy_reason":"","fallback_reason":""},"slot_resolution":{"slot_policy":"pak_top_strict_original_order","selection_source":"pak_top_direct","fallback_used":false,"policy_order":["1. 按 Pak Top 原始顺序逐项检查，不重排","2. 具体符号直接采用；歧义符号只做证据约束下的同义规范化","3. 重复、不可视化或无证据项记录原因后跳过","4. 遍历完整个 Pak 列表仍不足两个槽位，才依次使用 characterization、sticker、avatar"],"pak_top_symbols_original_order":[{"symbol":"tiger","category":"parsed"},{"symbol":"strawberry","category":"parsed"}],"pak_priority_symbols_used_by_workflow":["tiger","strawberry"],"ordered_symbol_decisions":[{"source_symbol":"tiger","canonical_object":"tiger","canonical_objects":["tiger"],"source_type":"pak_top","status":"resolved","evidence":["design_slots.primary_object"],"reason":"locked Design Slots consensus","accepted":true,"accepted_objects":["tiger"]},{"source_symbol":"strawberry","canonical_object":"strawberry","canonical_objects":["strawberry"],"source_type":"pak_top","status":"resolved","evidence":["design_slots.secondary_object"],"reason":"locked Design Slots consensus","accepted":true,"accepted_objects":["strawberry"]}],"community_tiebreak_applied":false,"pak_semantic_translation":{"form_exploration":[],"characterization_excerpt":"","top_stickers_text":[]},"creative_translation":{"primary":"tiger","secondary":"strawberry","source":"design_slots","style_pitch":"甜酷果兽感","lamp_head_silhouette":"灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。"},"final_primary":"tiger","final_secondary":"strawberry","final_reason":"两个槽位均来自 Pak Top 原始顺序；未采用项不参与后续 reference 匹配。 最终主视觉='tiger'，次视觉='strawberry'。"},"trace_excerpt":{"color":{"matched_rule_id":"design_slots_bounded_safety","fields":{"palette_id":"design_slots_bounded_safety","palette_name":"Pak Design Slots Palette","fallback_used":false,"input_primary_color":"purple","input_secondary_color":"orange","main_color":"purple","palette":["purple","orange","cyan","deep graphite gray"],"materials":[],"_truncated":true},"trace":[]},"shape":{"matched_rule_id":"default","fields":{"silhouette":"iconic sculpted lamp head","theme_title":"个性符号感 × 舞台应援感 × 收藏级偶像周边风","mood":"个性鲜明、舞台感","symbol_translation":"将「tiger」转译为灯头外轮廓、包边、冠饰、翅片、波形、花瓣、大体块结构或边缘切面","supporting_translation":"将「strawberry」仅作为小型浮雕、边缘节点、晶体镶嵌、局部发光细节或底座压纹，不要变成第二个主视觉","text_style":"文字区偏偶像灯牌和频道标题感，保持干净、饱满、有局部内发光","bottom_node":"加入与「tiger」相关的压纹、徽章、护片、切面或流线装饰件","silhouette_language":"圆润、完整、包裹、上扬、柔亮或利落的实体结构","_truncated":true},"trace":[{"rule_id":"hat","matched":false,"reason":"","skipped_because":"derived.primary_symbol_text='tiger' contains none of ['帽', 'hat', 'sombrero', 'fedora']"},{"rule_id":"butterfly","matched":false,"reason":"","skipped_because":"derived.primary_symbol_text='tiger' contains none of ['蝴蝶', 'butterfly', '나비']"},{"rule_id":"bird_wing","matched":false,"reason":"","skipped_because":"derived.primary_symbol_text='tiger' contains none of ['羽翼', 'wing', 'feather', '鸟', 'bird', '翅膀', '乌鸦', '黑鸟', 'crow', 'raven']"},{"rule_id":"crown","matched":false,"reason":"","skipped_because":"derived.primary_symbol_text='tiger' contains none of ['皇冠', '王冠', 'crown', 'queen', 'king', 'rey']"}]},"reference":{"matched_rule_id":"semantic_weighted_top_n","fields":{"picks":[{"id":"basketball_tiger_sport","image_path":"","role_description":"Demo content omitted from the public template.","score":4.66,"matched_tags":{"shape":["tiger"],"color":["orange"],"vibe":["cute"],"text":["latin"]},"matched_dimensions":["color","shape","text","vibe"],"specific_matched_tags":{"shape":["tiger"],"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin"]},"_truncated":true}],"top_candidates":[{"id":"basketball_tiger_sport","score":4.66,"match_strength":"semantic","specific_matched_tags":{"shape":["tiger"],"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin"]},"reference_policy_reason":"Specific semantic evidence is strong enough for this reference."},{"id":"cat_maru_paw_glow","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["purple"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."},{"id":"fire_plush_torch","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."},{"id":"sticker_ghost_soft","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["purple"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."}],"fallback_used":false,"top_n":1},"trace":[{"rule_id":"butterfly_korean","matched":false,"reason":"score=1.2 | color:purple | strength=style_only | specific=color:purple | ignored due to target script conflict | Specific evidence is too thin for shape transfer.","skipped_because":"reference text script conflicts with target script; Specific evidence is too thin for shape transfer."},{"rule_id":"mascot_cherry_jelly","matched":true,"reason":"score=0.2 | vibe:cute | text:latin,short | strength=style_only | generic=vibe:cute;text:latin,short | Only generic tags matched; use orientation/proportion only.","skipped_because":"Only generic tags matched; use orientation/proportion only."},{"rule_id":"boxer2_street_glove","matched":true,"reason":"score=1.4 | color:purple | text:latin,short | strength=style_only | specific=color:purple | generic=text:latin,short | Specific evidence is too thin for shape transfer.","skipped_because":"Specific evidence is too thin for shape transfer."},{"rule_id":"pink_hair_bull_star","matched":true,"reason":"score=0.2 | text:latin,short | strength=style_only | generic=text:latin,short | Only generic tags matched; use orientation/proportion only.","skipped_because":"Only generic tags matched; use orientation/proportion only."}]},"style_controls":{"wildness_score":0,"creativity_score":0,"aggression_delta":0,"effective_creativity":0,"confidence":"low","shape_boosts":[],"vibe_boosts":[],"material_boosts":[],"_truncated":true},"prompt_lint":{"prompt_chars":1947,"exact_text":"Demo Club","exact_text_count":3,"primary_symbol":"tiger","primary_symbol_count":3,"quoted_non_exact_cjk_terms":[],"negative_marker_count":11,"text_danger_counts":{},"_truncated":true}}},"effect":{"effect_id":"heart_lightstick_prompt_library_v2","effect_name":"心形应援棒 Prompt 母版 v2","confidence":0.0,"reason":"Fallback approved effect; no strong term match yet.","matched_terms":[]},"compiled":{"prompt_plan":{"effect_id":"heart_lightstick_prompt_library_v2","camera_contract":["pure black background","single full-body lightstick","front to very slight 3/4 studio product view","complete handle and compact bottom cap"],"product_contract":["dominant lamp head","streamer nameplate inside the lamp-head shape","central luminous core","connector ring"],"material_terms":["柔亮不透明树脂主体","亲肤哑光软橡胶辅件","小面积柔光发光内芯，配不透明背板"],"color_terms":["purple","orange","cyan","deep graphite gray"],"retained_elements":["tiger","strawberry"],"banned_elements":[],"retry_focus":[]},"color_plan":"purple, orange, cyan, deep graphite gray","material_language":["柔亮不透明树脂主体","亲肤哑光软橡胶辅件","小面积柔光发光内芯，配不透明背板"],"composition":"Single centered full-body product render on pure black, with complete handle and bottom cap.","required_elements":["single full-body lightstick","pure black background","exact streamer name inside the lamp-head shape","tiger"],"negative_constraints":[]},"references":[],"prompts":{"clean":"Demo content omitted from the public template.","clean_negative":"Demo content omitted from the public template.","handheld":"Demo content omitted from the public template.","handheld_negative":"Demo content omitted from the public template."},"payloads":{"clean":{"file_path":"","status":"missing"},"handheld":{"file_path":"","status":"missing"},"clean_raw_response_path":"","handheld_raw_response_path":""},"outputs":{"clean":{"source_path":"","asset":""},"handheld":{"source_path":"","asset":""}},"handheld":{"status":"succeeded","provider":"gpt_image_2","scene_template":"green_screen","prompt_flow":"one_step_handheld_chroma","chroma_screen":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"main_error":"","retry_source":""},"video":{"status":"succeeded","provider":"seedance2","model":"ep-20260309100637-kvgfg","duration":5,"resolution":"720p","audio_policy":"silent","prompt":"Demo content omitted from the public template.","chroma_screen":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"source_image":"","source_path":"","asset":"","error":""},"debug_card_excerpt":"","viewer_anchor_id":"demo-gift-001","variants":[{"label":"Mainline 定制方案","provider":"gpt_image_2","status":"succeeded","prompt_flow":"one_step_handheld_chroma","chroma_screen":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"final_asset":"","final_source_path":"<local-path-omitted>","clean_asset":"","reference_id":"basketball_tiger_sport","palette_id":"design_slots_bounded_safety","color_audit_status":"bounded_safety_compile","audited_primary_color":"purple","audited_secondary_color":"orange","candidate_mode":"","visual_alt_source":"","effective_primary_symbol":"","effective_secondary_symbol":"","candidate_policy_reason":"","fallback_reason":"","prompt":"Demo content omitted from the public template.","negative_prompt":"Demo content omitted from the public template.","payload":{"file_path":"","status":"missing"}},{"label":"PlanB 经典方案","provider":"gpt_image_2","status":"succeeded","prompt_flow":"one_step_handheld_chroma","chroma_screen":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"final_asset":"","final_source_path":"<local-path-omitted>","clean_asset":"","reference_id":"","palette_id":"","color_audit_status":"","audited_primary_color":"","audited_secondary_color":"","candidate_mode":"","visual_alt_source":"","effective_primary_symbol":"","effective_secondary_symbol":"","candidate_policy_reason":"","fallback_reason":"","prompt":"Demo content omitted from the public template.","negative_prompt":"Demo content omitted from the public template.","payload":{"file_path":"","status":"missing"}}],"review_context":{"available":true,"display_only":true,"source":"asset_lab_review_context","creator":{"nick_name":"Demo Creator 🐅","fans_club_name":"Demo Creator’s 🐅’s","bio_description":"Venmo: Demo Creatorvatore-Cusumano-1\nLIVE Everyday [10-2am CST]\nLinktree Below\n🐅"},"description":{"zh":"???????????????","en":"A fictional example used to demonstrate the review layout."},"avatar_asset":"","stickers":[]},"showcase":{"copy":{"status":"succeeded","creator_description":{"zh":"???????? Viewer ???????????????????????????????","en":"This fictional creator introduction demonstrates the Viewer layout. Replace it with project data during the build step."},"element_reason":{"zh":"???????????????????????","en":"A star and a sparkle demonstrate element tags and rationale layout."},"color_reason":{"zh":"???????????????????????","en":"Purple, gold, and cyan demonstrate palette chips and rationale text."}},"matting":{"mainline":{"status":"missing","icon":{"status":"missing","asset":""},"gift_panel":{"status":"missing","asset":""},"video":{"status":"missing","asset":""}},"planb":{"status":"missing","icon":{"status":"missing","asset":""},"gift_panel":{"status":"missing","asset":""},"video":{"status":"missing","asset":""}}}},"lineage":{"pak_input":{"owner":"Pak Data Mining","actual_source":"pak_json","accepted":true,"accepted_payload":{"anchor_id":"0000000000000000001","exact_text":{"text":"Demo Club"},"primary_object":{"name":"tiger","strength":"high"},"secondary_object":{"name":"strawberry","strength":"medium"},"primary_color":{"name":"purple","strength":"high"},"secondary_color":{"name":"orange","strength":"medium"},"accent_colors":[{"name":"cyan","strength":"medium"},{"name":"black","strength":"medium"}],"materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"}},"accepted_fields":["anchor_id","exact_text.text","primary_object.name/strength","secondary_object.name/strength"],"discarded_field_classes":["reason / rationale","evidence refs / source type","stickers / frames / avatars as design evidence","LLM score / token counts / media counts"],"rule":"field whitelist only; no design inference at the Pak adapter boundary"},"design_slots":{"owner":"Design workflow","contract_owner":"Design workflow","actual_source":"pak_json_normalization","translation_mode":"one_to_one_field_mapping","inference_allowed":false,"fields":[{"field":"exact_text","value":"Demo Club","strength":"","required":true,"owner":"Design workflow","complete":true},{"field":"primary_object","value":"tiger","strength":"high","required":true,"owner":"Design workflow","complete":true},{"field":"secondary_object","value":"strawberry","strength":"medium","required":true,"owner":"Design workflow","complete":true},{"field":"palette","value":"purple / orange / cyan / black","strength":{"primary":"high","secondary":"medium","accents":["medium","medium"]},"required":true,"owner":"Design workflow","complete":true}],"complete":true,"accent_colors":["cyan","black"],"materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"},"rejected_field_classes":["reason","rationale","evidence","media"]},"creative_llm":{"owner":"Design Linyi","actual_source":"creative_llm","input_mode":"text_only","prompt_injected":true,"status":"succeeded","error":"","locked_inputs":{"exact_text":"Demo Club","primary_object":"tiger","secondary_object":"strawberry","palette":"purple / orange / cyan / black","materials":"glossy_resin / matte_rubber / soft_emissive_panel"},"outputs":{"style_pitch":"甜酷果兽感","lamp_head_silhouette":"灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。","silhouette_language":"圆润、饱满、对称、幼态兽感中带果实弹性，避免尖刺和过细悬挑，以大曲面和浅层浮雕建立主次层级。","theme_forms":{"primary":{"symbol":"tiger","position":"灯头上半部居中主导","forms":["以简化虎首为主轮廓，头顶略宽、下缘收拢，形成稳定可制造的识别外形","双耳做成圆角三角突起，控制厚度避免过尖","额头与两侧用浅浮雕条纹表达兽感，不增加新主题","脸部不做人脸写实，仅保留抽象兽面分区与对称结构"]},"secondary":{"symbol":"strawberry","position":"包裹灯头下半部并向连接段过渡","forms":["以下宽上收的草莓果身曲线补足虎首下缘，使整体从上部兽首自然过渡到下部果形","表面用均匀浅凹籽点作为次级纹理，控制在边缘和下半区，不压过虎纹","顶部叶冠可简化为连接虎首下缘的包托结构，不独立长出第三主题感","果实鼓面可作为主要透光基底，让主体更有甜感和体量"]},"fusion_note":"整体采用“上虎下莓”的一体化结构：虎首负责识别性轮廓，草莓负责下半部体积与甜感纹理，二者通过共同的圆润外缘与连续曲面融合，避免像两个部件硬拼。"},"material_proposal":{},"material_application":"glossy_resin用于灯头主体外轮廓与主要鼓起结构，形成饱满兽首感与果实般通透鼓面；matte_rubber用于握柄包覆、防滑分区、局部转折过渡与底盖触感区，使手持稳定且削弱灯头与握柄连接处的生硬感；soft_emissive_panel嵌入灯头正面核心发光区、耳缘内侧小面积导光区以及与次物象相关的籽点/切片感细节中，形成分区发光而非整块泛白。","locked_materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"},"materials_locked":true,"handle":{"main_material":"matte_rubber","surface_treatment":"细磨砂防滑，主杆保持简洁直筒并在上段做轻微收腰，便于单手握持；可加入浅凹环纹提升抓握稳定性。","connector_detail":"连接段以短颈过渡至灯头，下宽上窄的圆角套环结构包覆接口，视觉上承接草莓下缘并隐藏装配缝。","bottom_cap":"底盖做圆角胶囊形收尾，略微外扩防滑落，可保留低调发光点或非发光压纹，不另起新主题造型。","decoration_continuation":"握柄装饰延续灯头的虎纹/草莓籽点语言，但仅以浅压纹或窄环带出现；靠近上段可呼应主体的条纹节奏，下段则更简洁，确保文字与主体仍是视觉核心。"},"lighting":"主发光集中在灯头正面中央至下半部，形成均匀果冻感面光；耳内侧与少量籽点细节做次级点状或短条导光，增强层次；边缘保留一定非发光区，让虎耳、虎纹和草莓籽点在亮起与熄灭时都清晰可辨。整体建议冷暖对比弱化，保持梦幻甜酷而不过分刺眼。","mood":{"phrase":"奶凶甜闪","tags":["可爱","甜酷","果冻感","轻潮玩"]},"text_treatment":{"exact_text":"Demo Club","source":"design_slots","script":"latin","style_hint":"“Demo Club”采用圆润微爪痕感字形，文字不外扩成独立物象，沿正面下缘或握柄上段竖向排布；整体为柔和发光描边配局部高亮面，字面可用低饱和冷光衬托，避免抢过主体轮廓。"}},"rules":["five core Design Slots are immutable","Pak material IDs are soft-locked; Creative LLM may only describe application","Creative LLM input mode is text-only","Creative LLM output must be injected into the final prompt"],"downstream":["design compiler","material router","reference router","mainline prompt"]},"routing":{"owner":"Design Linyi","actual_source":"deterministic_rules_and_libraries","color":{"observed_input":["purple","orange","cyan","black"],"routing_audit":["purple","orange"],"audit_status":"bounded_safety_compile","palette_rule":"design_slots_bounded_safety","final_prompt_palette":["purple","orange","cyan","deep graphite gray"],"reason":"preserve order and hue; soften only absolute black or explicit oversaturation","rejected_colors":[],"safety_adjustments":[{"original":"black","final":"deep graphite gray","reason":"black_routed_to_deep_graphite_gray"}],"warnings":[]},"objects":{"primary":{"original_object":"tiger","final_object":"tiger","changed":false,"reason":"pak_object_passthrough"},"secondary":{"original_object":"strawberry","final_object":"strawberry","changed":false,"reason":"pak_object_passthrough"}},"material":{"creative_proposal":{"main":"","supporting":"","tags":[]},"material_source":"pak_input","original_materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"},"final_materials":{"main":"glossy_resin","supporting":"matte_rubber","accent":"soft_emissive_panel"},"prompt_terms":["柔亮不透明树脂主体","亲肤哑光软橡胶辅件","小面积柔光发光内芯，配不透明背板"],"safety_remap":{},"remap_reasons":[],"accent_coverage":"small","opaque_backing":true,"solid_outer_edge":false,"transparency_risk_check":{"status":"passed","issues":[]},"profile":"pak_soft_locked","main":"柔亮不透明树脂主体","supporting":"亲肤哑光软橡胶辅件","accent":"小面积柔光发光内芯，配不透明背板","final_terms":["柔亮不透明树脂主体","亲肤哑光软橡胶辅件","小面积柔光发光内芯，配不透明背板"],"reason":"Pak material IDs are soft-locked; only invalid-role and explicit transparency safety rules may adjust them"},"reference":{"selected_id":"basketball_tiger_sport","selected_asset":"","selected_role":"Demo content omitted from the public template.","match_strength":"","rule":"semantic_weighted_top_n","reason":"","top_candidates":[{"id":"basketball_tiger_sport","score":4.66,"match_strength":"semantic","specific_matched_tags":{"shape":["tiger"],"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin"]},"reference_policy_reason":"Specific semantic evidence is strong enough for this reference."},{"id":"cat_maru_paw_glow","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["purple"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."},{"id":"fire_plush_torch","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["orange"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."},{"id":"sticker_ghost_soft","score":1.44,"match_strength":"style_only","specific_matched_tags":{"color":["purple"]},"generic_matched_tags":{"vibe":["cute"],"text":["latin","short"]},"reference_policy_reason":"Specific evidence is too thin for shape transfer."}]},"chroma":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"silhouette_source":"creative_llm","legacy_shape_trace":{"matched_rule_id":"default","silhouette":"iconic sculpted lamp head","reason":"no shape rule matched; using defaults"},"downstream":["mainline prompt","PlanB palette","chroma contract"]},"prompt_compile":{"owner":"Design Linyi","actual_source":"deterministic_prompt_compiler","mainline":{"inputs":{"design_slots":{"exact_text":"Demo Club","primary_object":"tiger","secondary_object":"strawberry","palette":"purple / orange / cyan / black","materials":"glossy_resin / matte_rubber / soft_emissive_panel"},"silhouette":"灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。","reference_id":"basketball_tiger_sport","chroma":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."}},"sections":{"text":"Demo Club","structure":{"primary":{"symbol":"tiger","position":"灯头上半部居中主导","forms":["以简化虎首为主轮廓，头顶略宽、下缘收拢，形成稳定可制造的识别外形","双耳做成圆角三角突起，控制厚度避免过尖","额头与两侧用浅浮雕条纹表达兽感，不增加新主题","脸部不做人脸写实，仅保留抽象兽面分区与对称结构"]},"secondary":{"symbol":"strawberry","position":"包裹灯头下半部并向连接段过渡","forms":["以下宽上收的草莓果身曲线补足虎首下缘，使整体从上部兽首自然过渡到下部果形","表面用均匀浅凹籽点作为次级纹理，控制在边缘和下半区，不压过虎纹","顶部叶冠可简化为连接虎首下缘的包托结构，不独立长出第三主题感","果实鼓面可作为主要透光基底，让主体更有甜感和体量"]},"fusion_note":"整体采用“上虎下莓”的一体化结构：虎首负责识别性轮廓，草莓负责下半部体积与甜感纹理，二者通过共同的圆润外缘与连续曲面融合，避免像两个部件硬拼。"},"silhouette":"灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。","palette":["purple","orange","cyan","deep graphite gray"],"materials":["柔亮不透明树脂主体","亲肤哑光软橡胶辅件","小面积柔光发光内芯，配不透明背板"],"handle":{"main_material":"matte_rubber","surface_treatment":"细磨砂防滑，主杆保持简洁直筒并在上段做轻微收腰，便于单手握持；可加入浅凹环纹提升抓握稳定性。","connector_detail":"连接段以短颈过渡至灯头，下宽上窄的圆角套环结构包覆接口，视觉上承接草莓下缘并隐藏装配缝。","bottom_cap":"底盖做圆角胶囊形收尾，略微外扩防滑落，可保留低调发光点或非发光压纹，不另起新主题造型。","decoration_continuation":"握柄装饰延续灯头的虎纹/草莓籽点语言，但仅以浅压纹或窄环带出现；靠近上段可呼应主体的条纹节奏，下段则更简洁，确保文字与主体仍是视觉核心。"},"composition":"Single centered full-body product render on pure black, with complete handle and bottom cap."},"prompt":"Demo content omitted from the public template.","negative_prompt":"Demo content omitted from the public template."},"planb":{"enabled":true,"actual_source":"strict_template_compiler","uses_creative_llm":false,"inputs":{"exact_text":"Demo Club","locked_palette":"purple / orange / cyan / black","chroma":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"template":""},"bypassed_stages":["creative_llm","mainline_router","mainline_reference"],"prompt":"Demo content omitted from the public template.","negative_prompt":"Demo content omitted from the public template."},"downstream":["mainline image provider","PlanB image provider"]},"static_delivery":{"owner":"Engineering","actual_source":"image_providers","mainline":{"label":"Mainline 定制方案","status":"succeeded","provider":"gpt_image_2","model":"","size":"","quality":"","asset":"","chroma":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."}},"planb":{"label":"PlanB 经典方案","status":"succeeded","provider":"gpt_image_2","model":"","size":"","quality":"","asset":"","chroma":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."}},"downstream":["Seedance video","product delivery","chroma key pipeline"]},"video_delivery":{"owner":"Engineering","actual_source":"seedance2","source_anchor_id":"0000000000000000001","source_image":"","status":"succeeded","provider":"seedance2","model":"ep-20260309100637-kvgfg","duration":5,"resolution":"720p","audio_policy":"silent","chroma":{"mode":"green_screen","key_color_hex":"#00FF00","selection_source":"cli_override","detected_color_families":["green","blue"],"conflict":true,"conflict_reason":"Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."},"prompt":"Demo content omitted from the public template.","asset":"","error":"","downstream":["product delivery","external chroma key pipeline"]}}}]}</script>
+  <script>
+    const data = JSON.parse(document.getElementById('workflow-data').textContent);
+    const showcaseBaseHref = "index.html";
+    const workflowBaseHref = "workflow.html";
+    const initialParams = new URLSearchParams(window.location.search);
+    const requestedAnchorId = initialParams.get('anchor_id');
+    const requestedIndex = requestedAnchorId
+      ? data.items.findIndex((item) => String(item.anchor_id || '') === requestedAnchorId || String(item.viewer_anchor_id || '') === requestedAnchorId)
+      : -1;
+    let selectedIndex = requestedIndex >= 0 ? requestedIndex : 0;
+    let selectedTab = 'overview';
+    let selectedNode = 'pak_input';
+    let roleFocus = 'all';
+    let uiLang = initialParams.get('lang') === 'en' ? 'en' : 'zh';
+    let galleryMode = 'paged';
+    let currentPage = 0;
+    const pageSize = 10;
+    currentPage = Math.floor(selectedIndex / pageSize);
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+    }
+    function badge(text, tone = '') {
+      return `<span class="badge ${tone}">${escapeHtml(text)}</span>`;
+    }
+    function statusInline(text, tone = '') {
+      return `<span class="card-status"><i class="status-dot ${tone}"></i>${escapeHtml(text)}</span>`;
+    }
+    function statusLabel(status) {
+      const labels = {
+        succeeded: ['成功', 'Succeeded'],
+        retry_succeeded: ['重试成功', 'Retry succeeded'],
+        failed: ['失败', 'Failed'],
+        missing: ['缺失', 'Missing'],
+        present: ['已记录', 'Present'],
+      };
+      return labels[status] ? t(labels[status][0], labels[status][1]) : (status || t('缺失', 'Missing'));
+    }
+    function colorAuditLabel(status) {
+      const labels = {
+        accepted: 'Pak 色通过',
+        softened: '中性色过滤',
+        demoted: '高饱和降级',
+        design_filled: '设计补色',
+      };
+      return labels[status] || '颜色已就绪';
+    }
+    function colorAuditTone(status) {
+      if (status === 'design_filled' || status === 'demoted') return 'warn';
+      if (status === 'softened') return 'ok';
+      return 'ok';
+    }
+    function matchStrengthLabel(strength) {
+      const labels = {
+        semantic: ['语义参考', 'Semantic match'],
+        style_only: ['姿态参考', 'Pose reference'],
+        fallback_pool: ['多样兜底', 'Diversity fallback'],
+      };
+      return labels[strength] ? t(labels[strength][0], labels[strength][1]) : (strength || t('未评估', 'Not evaluated'));
+    }
+    function matchStrengthTone(strength) {
+      if (strength === 'semantic') return 'ok';
+      if (strength === 'style_only') return 'soft';
+      if (strength === 'fallback_pool') return 'warn';
+      return '';
+    }
+    function compactTags(tags) {
+      if (!tags || typeof tags !== 'object') return '';
+      return Object.entries(tags)
+        .filter(([, values]) => Array.isArray(values) && values.length)
+        .map(([dim, values]) => `${dim}:${values.slice(0, 4).join(',')}`)
+        .join(' | ');
+    }
+    function yesNo(value) {
+      return value ? t('是', 'Yes') : t('否', 'No');
+    }
+    function isOneStepItem(item) {
+      return ['one_step_handheld_chroma', 'one_step_handheld_green'].includes(item?.handheld?.prompt_flow);
+    }
+    function outputModeLabel(mode) {
+      const labels = {
+        clean: ['只生成 Clean 图', 'Clean image only'],
+        two_step_handheld: ['两步绿幕手持', 'Two-step handheld'],
+        one_step_handheld_green: ['一步绿幕手持', 'One-step green-screen handheld'],
+        one_step_handheld_chroma: ['一步自适应幕色手持', 'One-step adaptive-chroma handheld'],
+      };
+      return labels[mode] ? t(labels[mode][0], labels[mode][1]) : (mode || t('混合/未知', 'Mixed/unknown'));
+    }
+    function handheldOutputLabel(item) {
+      return isOneStepItem(item) ? '一步抠像幕手持' : '手持图';
+    }
+    function cleanOutputLabel(item) {
+      return isOneStepItem(item) ? '同一张最终图' : 'Clean 图';
+    }
+    function list(values) {
+      const arr = Array.isArray(values) ? values.filter(Boolean) : [];
+      if (!arr.length) return `<div class="empty">${t('暂无记录', 'No record')}</div>`;
+      return `<ul class="list">${arr.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+    }
+    function kv(rows) {
+      return `<table class="kv"><tbody>${rows.map(([k, v]) => `<tr><th>${escapeHtml(k)}</th><td>${renderValue(v)}</td></tr>`).join('')}</tbody></table>`;
+    }
+    function renderValue(value) {
+      if (Array.isArray(value)) {
+        if (!value.length) return `<span class="path">${t('缺失', 'Missing')}</span>`;
+        const compact = value.map((item) => item && typeof item === 'object' ? JSON.stringify(item) : String(item));
+        return escapeHtml(compact.join(' · '));
+      }
+      if (value && typeof value === 'object') return `<pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;
+      return value ? escapeHtml(value) : `<span class="path">${t('缺失', 'Missing')}</span>`;
+    }
+    function img(src, label) {
+      if (!src) return `<div class="missing-thumb">${t('缺失', 'Missing')}</div>`;
+      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(label)}">`;
+    }
+    function previewButton(src, label, owner = '') {
+      if (!src) return `<div class="missing-thumb">${t('缺失', 'Missing')}</div>`;
+      const title = owner ? `${owner} · ${label}` : label;
+      return `<button class="preview-button" type="button" data-preview-src="${escapeHtml(src)}" data-preview-title="${escapeHtml(title)}" aria-label="${escapeHtml(`${title} · ${t('放大预览', 'Open preview')}`)}">${img(src, label)}<span class="zoom-hint" aria-hidden="true">${t('放大', 'Zoom')}</span></button>`;
+    }
+    function figure(src, label, sourcePath) {
+      if (!src) return `<div class="empty">缺少 ${escapeHtml(label)} 图片</div>`;
+      return `<figure class="figure">${previewButton(src, label, data.items[selectedIndex]?.host_name || '')}<figcaption>${escapeHtml(label)}</figcaption></figure>`;
+    }
+    function hasCompareVariants(item) {
+      return Array.isArray(item.variants) && item.variants.length > 1;
+    }
+    function candidateSourceLabel(source, fallbackReason = '') {
+      if (fallbackReason) return t('PlanB 改名兜底', 'PlanB rename fallback');
+      if (source === 'primary_mainline') return t('默认主线', 'Default mainline');
+      return source || t('生成策略', 'Generation policy');
+    }
+    function formatSymbolDecisions(values) {
+      const arr = Array.isArray(values) ? values : [];
+      return arr.map((item) => {
+        const source = item.source_symbol || item.source_type || 'unknown';
+        const target = item.canonical_object ? ` → ${item.canonical_object}` : '';
+        const result = item.accepted ? '采用' : (item.status === 'duplicate' ? '重复跳过' : '跳过');
+        const reason = item.reason ? `：${item.reason}` : '';
+        return `${source}${target}（${result}）${reason}`;
+      });
+    }
+    function formatTopSymbols(values) {
+      const arr = Array.isArray(values) ? values : [];
+      return arr.map((item) => {
+        if (item && typeof item === 'object') {
+          const symbol = item.symbol || item.value || '';
+          const category = item.category || item.source || '';
+          return category ? `${symbol}(${category})` : symbol;
+        }
+        return item;
+      }).filter(Boolean).join(', ');
+    }
+    function formatVlmSymbols(value) {
+      if (!value || typeof value !== 'object') return '';
+      const primary = value.primary || '';
+      const secondary = value.secondary || '';
+      const source = value.source || '';
+      const pitch = value.style_pitch || '';
+      return [primary && `primary=${primary}`, secondary && `secondary=${secondary}`, source && `source=${source}`, pitch && `style=${pitch}`].filter(Boolean).join(' / ');
+    }
+    function finalOutputAsset(item) {
+      return item.outputs.handheld.asset || item.outputs.clean.asset || '';
+    }
+    function renderCardMedia(item) {
+      if (hasCompareVariants(item)) {
+        return `<div class="variant-thumbs">${item.variants.map((variant, variantIndex) => { const role = variantIndex === 1 ? 'planb' : 'mainline'; const label = localizedAssetLabel(variant.label, role); return `<div class="variant-thumb">${previewButton(variant.final_asset, label, item.host_name)}<div class="variant-label">${escapeHtml(label)}</div></div>`; }).join('')}</div>`;
+      }
+      const finalAsset = finalOutputAsset(item);
+      return `${previewButton(finalAsset, handheldOutputLabel(item), item.host_name)}${isOneStepItem(item) ? '' : `<div class="mini-thumb">${img(item.outputs.clean.asset, 'clean')}</div>`}`;
+    }
+    function mediaImageTile(src, label, detail, isPrimary = false) {
+      return `<figure class="media-tile ${isPrimary ? 'primary' : ''}">
+        ${src ? previewButton(src, label, data.items[selectedIndex]?.host_name || '') : `<div class="media-empty">${t('暂无图片', 'No image')}</div>`}
+        <figcaption class="media-caption"><div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(detail || '')}</span></div>${statusInline(src ? t('已生成', 'Generated') : t('缺失', 'Missing'), src ? 'ok' : 'warn')}</figcaption>
+      </figure>`;
+    }
+    function mediaVideoTile(item) {
+      const video = item.video || {};
+      return `<figure class="media-tile">
+        ${video.asset ? `<video controls playsinline preload="metadata" src="${escapeHtml(video.asset)}"></video>` : `<div class="media-empty">${t('暂无动态视频', 'No video')}</div>`}
+        <figcaption class="media-caption"><div><strong>${t('动态礼物', 'Video gift')}</strong><span>${video.asset ? `${video.duration || 3} ${t('秒', 'sec')} · ${video.audio_policy === 'silent' ? t('无声', 'Silent') : (video.audio_policy || '')}` : t('由主线静态图生成', 'Generated from the mainline image')}</span></div>${statusInline(video.asset ? t('已生成', 'Generated') : statusLabel(video.status), video.asset ? 'ok' : 'warn')}</figcaption>
+      </figure>`;
+    }
+    function localizedAssetLabel(raw, role) {
+      if (uiLang === 'zh') return raw || (role === 'planb' ? 'PlanB · 主线同色系' : '主线定制图');
+      return role === 'planb' ? 'PlanB · strict template' : 'Mainline custom image';
+    }
+    function renderReviewContext(item) {
+      const context = item.review_context || {};
+      if (!context.available) return '';
+      const creator = context.creator || {};
+      const avatar = context.avatar_asset || item.inputs?.avatar_asset || '';
+      const stickers = Array.isArray(context.stickers) ? context.stickers : [];
+      const stickerGrid = stickers.length
+        ? `<div class="review-stickers">${stickers.map((sticker) => `<figure class="review-sticker">${previewButton(sticker.asset, sticker.description || t('主播贴纸', 'Creator sticker'), creator.nick_name || item.host_name)}<figcaption title="${escapeHtml(sticker.description || '')}">${escapeHtml(sticker.description || t('暂无贴纸描述', 'No sticker description'))}</figcaption></figure>`).join('')}</div>`
+        : `<div class="empty">${t('暂无可展示贴纸', 'No displayable stickers')}</div>`;
+      return `<section class="review-context">
+        <div class="review-context-head">
+          <div><h3>${t('主播原始上下文', 'Original creator context')}</h3><p>${t('帮助判断礼物是否符合主播；这些内容不参与任何生成步骤。', 'Use this context to judge creator fit. It is never used by generation.')}</p></div>
+          <span class="display-only-label">${t('仅审核展示', 'Review only')}</span>
+        </div>
+        <div class="review-context-profile">
+          <div class="review-context-avatar">${img(avatar, t('主播头像', 'Creator avatar'))}</div>
+          <div class="review-context-copy">
+            <strong>${escapeHtml(creator.nick_name || item.host_name || '—')}</strong>
+            <p><b>${t('粉丝团', 'Fan club')}：</b>${escapeHtml(creator.fans_club_name || t('未提供', 'Not provided'))}</p>
+            <p><b>Bio：</b>${escapeHtml(creator.bio_description || t('未提供', 'Not provided'))}</p>
+            <p><b>${t('主播描述', 'Creator description')}：</b>${escapeHtml(context.description || t('未提供', 'Not provided'))}</p>
+          </div>
+        </div>
+        ${stickerGrid}
+      </section>`;
+    }
+    function renderOverview(item) {
+      const variants = Array.isArray(item.variants) ? item.variants : [];
+      const mainVariant = variants[0] || {};
+      const planbVariant = variants[1] || {};
+      const mainAsset = mainVariant.final_asset || finalOutputAsset(item);
+      const mainLabel = localizedAssetLabel(mainVariant.label, 'mainline');
+      const mainDetail = mainVariant.provider || item.handheld.provider || '';
+      const planbAsset = planbVariant.final_asset || '';
+      const planbLabel = localizedAssetLabel(planbVariant.label, 'planb');
+      const planbDetail = planbVariant.provider || (planbAsset ? t('严格模板 · 独立生成', 'Strict template · independent') : t('本轮未生成', 'Not generated'));
+      const slot = item.route.slot_resolution || {};
+      const ref = item.route.reference || {};
+      const creative = item.lineage?.creative_llm || {};
+      const creativeOk = creative.status === 'succeeded';
+      const formalStatus = mainlineStatus(item);
+      const planbStatus = item.lineage?.static_delivery?.planb?.status || (planbAsset ? 'succeeded' : 'missing');
+      const referenceLabel = ref.reference_id
+        ? `${ref.reference_id}${ref.match_strength ? ` · ${matchStrengthLabel(ref.match_strength)}` : ''}`
+        : t('未使用', 'Not used');
+      const colors = [item.route.color.audited_primary_color, item.route.color.audited_secondary_color].filter(Boolean).join(' + ');
+      return `<section class="review-workspace">
+        <div class="media-deck">
+          ${mediaImageTile(mainAsset, mainLabel, mainDetail, true)}
+          ${mediaImageTile(planbAsset, planbLabel, planbDetail)}
+          ${mediaVideoTile(item)}
+        </div>
+        <aside class="decision-rail">
+          <h3>${t('关键决策', 'Key decisions')}</h3>
+          <p class="note">${t('从 Pak JSON 到最终礼物的最短生成记录。', 'The shortest generation record from Pak JSON to the final gift.')}</p>
+          <dl class="decision-list">
+            <div class="decision-row"><dt>exact_text</dt><dd>${escapeHtml(item.design_slots?.exact_text || t('缺失', 'Missing'))}</dd></div>
+            <div class="decision-row"><dt>${t('主视觉', 'Primary')}</dt><dd>${escapeHtml(slot.final_primary || item.vision.final_symbols.primary || t('缺失', 'Missing'))}</dd></div>
+            <div class="decision-row"><dt>${t('次视觉', 'Secondary')}</dt><dd>${escapeHtml(slot.final_secondary || item.vision.final_symbols.secondary || t('缺失', 'Missing'))}</dd></div>
+            <div class="decision-row"><dt>Design Slots</dt><dd>${item.lineage?.design_slots?.complete ? t('5/5 已锁定', '5/5 locked') : t('不完整', 'Incomplete')}</dd></div>
+            <div class="decision-row"><dt>Creative LLM</dt><dd>${statusInline(creativeOk ? t('文本输入 · 已注入', 'Text-only · Injected') : t('正式步骤失败', 'Formal step failed'), creativeOk ? 'ok' : 'fail')}</dd></div>
+            <div class="decision-row"><dt>${t('审计配色', 'Audited colors')}</dt><dd>${escapeHtml(colors || item.route.color.palette_id || t('缺失', 'Missing'))}</dd></div>
+            <div class="decision-row"><dt>${t('主材', 'Main material')}</dt><dd>${escapeHtml(item.route.material.main_material || t('缺失', 'Missing'))}</dd></div>
+            <div class="decision-row"><dt>Reference</dt><dd>${escapeHtml(referenceLabel)}</dd></div>
+            <div class="decision-row"><dt>${t('交付状态', 'Delivery')}</dt><dd>${statusInline(`${t('主线', 'Mainline')} · ${statusLabel(formalStatus)}`, formalStatus === 'failed' ? 'fail' : 'ok')} ${statusInline(`PlanB · ${statusLabel(planbStatus)}`, planbStatus === 'succeeded' ? 'ok' : 'warn')}</dd></div>
+          </dl>
+        </aside>
+      </section>${renderReviewContext(item)}`;
+    }
+    function renderSummary() {
+      const s = data.summary;
+      const staticTotal = (s.variant_summaries || []).length > 1
+        ? (s.variant_summaries || []).reduce((sum, item) => sum + (item.final_success_rows || 0), 0)
+        : s.handheld_success_rows;
+      const expectedStatic = (s.total_rows || 0) * Math.max(1, (s.variant_summaries || []).length);
+      const mainlineSuccess = data.items.filter((item) => ['succeeded', 'retry_succeeded'].includes(mainlineStatus(item))).length;
+      const attentionTotal = Math.max(0, expectedStatic - staticTotal) + (s.video_failed_rows || 0) + (s.retry_succeeded_rows || 0) + (s.creative_llm_failed_rows || 0) + (s.reference_concentration_risk ? 1 : 0);
+      const overallTone = attentionTotal ? 'warn' : 'ok';
+      document.getElementById('runContext').innerHTML = `<span>${statusInline(attentionTotal ? t('有待关注项', 'Attention needed') : t('运行正常', 'Run healthy'), overallTone)}</span><strong>${escapeHtml(s.provider || t('provider 缺失', 'Provider missing'))}</strong><span>${escapeHtml(s.output_mode || '')}</span>`;
+      document.getElementById('summary').innerHTML = `
+        <div class="summary-grid">
+          <div class="metric"><div class="label">${t('主播数', 'Creators')}</div><div class="value">${s.total_rows}</div></div>
+          <div class="metric"><div class="label">${t('静态资产', 'Static assets')}</div><div class="value">${staticTotal}</div></div>
+          <div class="metric"><div class="label">${t('动态视频', 'Videos')}</div><div class="value">${s.video_success_rows || 0}</div></div>
+          <div class="metric"><div class="label">${t('待关注', 'Attention')}</div><div class="value">${attentionTotal}</div></div>
+        </div>
+        <details class="run-diagnostics">
+          <summary>${t('运行诊断', 'Run diagnostics')}</summary>
+          <div class="details-body">
+            <div class="diagnostic-grid">
+              <div class="diagnostic-item"><span>${t('正式主线成功', 'Formal mainline success')}</span><strong>${mainlineSuccess} / ${s.total_rows || 0}</strong></div>
+              <div class="diagnostic-item"><span>Creative LLM</span><strong>${Math.max(0, (s.total_rows || 0) - (s.creative_llm_failed_rows || 0))} / ${s.total_rows || 0}</strong></div>
+              <div class="diagnostic-item"><span>${t('颜色审计', 'Color audit')}</span><strong>${s.color_filtered_rows || 0}</strong></div>
+              <div class="diagnostic-item"><span>${t('重试恢复', 'Retry recovery')}</span><strong>${s.retry_succeeded_rows || 0}</strong></div>
+              <div class="diagnostic-item"><span>${t('参考覆盖', 'Reference coverage')}</span><strong>${s.reference_unique_count || 0}</strong></div>
+              <div class="diagnostic-item"><span>${t('最高引用', 'Top reference share')}</span><strong>${Math.round((s.reference_top_share || 0) * 100)}%</strong></div>
+            </div>
+            <div class="badges">
+              ${badge('背景：' + s.scene_template)}
+              ${badge('参考 top：' + (s.reference_top_id || '无') + ' × ' + (s.reference_top_count || 0), s.reference_concentration_risk ? 'warn' : '')}
+              ${badge('semantic/style/fallback：' + (s.reference_semantic_rows || 0) + '/' + (s.reference_style_only_rows || 0) + '/' + (s.reference_fallback_rows || 0), 'soft')}
+              ${badge('幕色：绿 ' + (s.chroma_screen_counts?.green_screen || 0) + ' / 蓝 ' + (s.chroma_screen_counts?.blue_screen || 0) + ' / 洋红 ' + (s.chroma_screen_counts?.magenta_screen || 0), 'soft')}
+              ${s.chroma_conflict_rows ? badge('幕色冲突：' + s.chroma_conflict_rows, 'warn') : ''}
+              ${s.chroma_remapped_rows ? badge('幕色冲突调整：' + s.chroma_remapped_rows, 'soft') : ''}
+              ${s.compare_enabled ? badge('双资产：' + s.run_label + ' / ' + s.compare_label, 'soft') : ''}
+            </div>
+          </div>
+        </details>`;
+    }
+    function t(zh, en) { return uiLang === 'zh' ? zh : en; }
+    function linkedViewerHref(base, anchorId) {
+      const params = new URLSearchParams();
+      if (anchorId) params.set('anchor_id', anchorId);
+      if (uiLang === 'en') params.set('lang', 'en');
+      const query = params.toString();
+      return query ? `${base}?${query}` : base;
+    }
+    function syncSelectionUrl() {
+      const anchorId = String(data.items[selectedIndex]?.viewer_anchor_id || data.items[selectedIndex]?.anchor_id || '');
+      const params = new URLSearchParams(window.location.search);
+      if (anchorId) params.set('anchor_id', anchorId); else params.delete('anchor_id');
+      if (uiLang === 'en') params.set('lang', 'en'); else params.delete('lang');
+      const query = params.toString();
+      history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+    }
+    function mainlineStatus(item) {
+      return item?.lineage?.creative_llm?.status === 'succeeded'
+        ? (item?.handheld?.status || 'missing')
+        : 'failed';
+    }
+    function ownerLabel(owner) {
+      const labels = {
+        pak: ['Pak 数据挖掘', 'Pak Data Mining'],
+        design: ['设计 Linyi', 'Design Linyi'],
+        engineering: ['研发', 'Engineering'],
+        product: ['产品', 'Product'],
+      };
+      return t(...(labels[owner] || [owner || '未指定', owner || 'Unassigned']));
+    }
+    function roleNodeIds(role) {
+      const mapping = {
+        pak: ['pak_input', 'design_slots'],
+        design: ['design_slots', 'creative_llm', 'routing', 'prompt_compile'],
+        engineering: ['design_slots', 'prompt_compile'],
+        product: ['design_slots', 'prompt_compile'],
+      };
+      return mapping[role] || (data.workflow_nodes || []).map((node) => node.id);
+    }
+    function nodeStatus(item, nodeId) {
+      const node = item.lineage?.[nodeId] || {};
+      if (nodeId === 'pak_input') return [node.accepted ? 'succeeded' : 'failed', node.accepted ? t('已接收', 'Accepted') : t('拒绝', 'Rejected')];
+      if (nodeId === 'design_slots') return node.complete ? ['succeeded', '5/5'] : ['failed', `${(node.fields || []).filter((field) => field.complete).length}/5`];
+      if (nodeId === 'creative_llm') {
+        const outputs = node.outputs || {};
+        const hasCreativeOutput = Boolean(outputs.style_pitch || outputs.lamp_head_silhouette || outputs.silhouette_language || outputs.material_application);
+        const valid = hasCreativeOutput
+          && node.status === 'succeeded'
+          && node.actual_source === 'creative_llm'
+          && node.input_mode === 'text_only'
+          && node.prompt_injected === true;
+        return valid
+          ? ['succeeded', t('文本输入 · 已注入', 'Text-only · Injected')]
+          : ['failed', t('正式步骤失败', 'Formal step failed')];
+      }
+      if (nodeId === 'routing') return [(node.reference?.selected_id || node.color?.final_prompt_palette?.length) ? 'succeeded' : 'missing', node.reference?.selected_id ? t('已路由', 'Routed') : t('部分', 'Partial')];
+      if (nodeId === 'prompt_compile') return [node.mainline?.prompt ? 'succeeded' : 'missing', node.planb?.enabled ? t('双分支', 'Two branches') : t('主线', 'Mainline')];
+      return [node.status || 'missing', statusLabel(node.status)];
+    }
+    function renderTimeline() {
+      const planbExpected = Boolean(data.summary.planb_enabled);
+      const introNote = planbExpected
+        ? t('PlanB 从锁定的 Design Slots 独立编译严格模板，不调用 Creative LLM。', 'PlanB independently compiles its strict template from locked Design Slots without Creative LLM.')
+        : t('本次只生成主线图片。', 'This run generates the mainline image only.');
+      document.getElementById('timeline').innerHTML = `<div class="workflow-intro"><span>${t('生成主线', 'Generation flow')}</span><strong>Pak JSON → Design Slots → Creative LLM → Routing & Prompt → Image</strong><p>${introNote}</p></div>`;
+    }
+    function renderGallery() {
+      renderGalleryControls();
+      const start = galleryMode === 'all' ? 0 : currentPage * pageSize;
+      const visibleItems = galleryMode === 'all' ? data.items : data.items.slice(start, start + pageSize);
+      document.getElementById('gallery').innerHTML = visibleItems.map((item, localIdx) => {
+        const idx = galleryMode === 'all' ? localIdx : start + localIdx;
+        const formalStatus = mainlineStatus(item);
+        const statusTone = formalStatus === 'failed' ? 'fail' : formalStatus === 'retry_succeeded' ? 'warn' : 'ok';
+        const avatar = item.inputs?.avatar_asset
+          ? `<img src="${escapeHtml(item.inputs.avatar_asset)}" alt="">`
+          : escapeHtml(String(item.host_name || '?').slice(0, 1));
+        return `<article class="card ${idx === selectedIndex ? 'active' : ''}">
+          <div class="thumbs">${renderCardMedia(item)}</div>
+          <button class="card-select" type="button" data-index="${idx}" aria-pressed="${idx === selectedIndex}" aria-label="${escapeHtml(`${String(item.row_id).padStart(3, '0')} · ${item.host_name}`)}">
+            <span class="card-avatar" aria-hidden="true">${avatar}</span>
+            <span class="card-copy"><span class="card-title">${String(item.row_id).padStart(3, '0')} · ${escapeHtml(item.host_name)}</span><span class="card-meta">${statusInline(statusLabel(formalStatus), statusTone)}${item.video?.status === 'succeeded' ? statusInline(t('含视频', 'Video'), 'ok') : ''}</span></span>
+          </button>
+        </article>`;
+      }).join('');
+      document.querySelectorAll('.card-select').forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedIndex = Number(button.dataset.index);
+          selectedTab = 'overview';
+          renderAll();
+          document.getElementById('detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+      wirePreviewButtons();
+    }
+    function renderGalleryControls() {
+      const total = data.items.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      currentPage = Math.min(Math.max(currentPage, 0), totalPages - 1);
+      const start = galleryMode === 'all' ? 0 : currentPage * pageSize;
+      const end = galleryMode === 'all' ? total : Math.min(start + pageSize, total);
+      const pagedMode = document.getElementById('pagedMode');
+      const allMode = document.getElementById('allMode');
+      pagedMode.classList.toggle('active', galleryMode === 'paged');
+      allMode.classList.toggle('active', galleryMode === 'all');
+      pagedMode.setAttribute('aria-pressed', String(galleryMode === 'paged'));
+      allMode.setAttribute('aria-pressed', String(galleryMode === 'all'));
+      pagedMode.onclick = () => {
+        galleryMode = 'paged';
+        currentPage = Math.floor(selectedIndex / pageSize);
+        renderGallery();
+      };
+      allMode.onclick = () => {
+        galleryMode = 'all';
+        renderGallery();
+      };
+      document.getElementById('galleryRange').textContent =
+        galleryMode === 'all' ? t(`全部 ${total} 个`, `All ${total}`) : t(`当前 ${start + 1}-${end} / ${total}`, `Showing ${start + 1}-${end} / ${total}`);
+      const pager = document.getElementById('pager');
+      if (galleryMode === 'all') {
+        pager.innerHTML = '';
+        return;
+      }
+      pager.innerHTML = Array.from({ length: totalPages }, (_, page) => {
+        const pageStart = page * pageSize + 1;
+        const pageEnd = Math.min((page + 1) * pageSize, total);
+        return `<button type="button" class="${page === currentPage ? 'active' : ''}" data-page="${page}" title="${pageStart}-${pageEnd}" aria-label="${escapeHtml(t(`第 ${page + 1} 页，${pageStart}-${pageEnd}`, `Page ${page + 1}, items ${pageStart}-${pageEnd}`))}" ${page === currentPage ? 'aria-current="page"' : ''}>${page + 1}</button>`;
+      }).join('');
+      pager.querySelectorAll('[data-page]').forEach((button) => {
+        button.addEventListener('click', () => {
+          currentPage = Number(button.dataset.page);
+          selectedIndex = currentPage * pageSize;
+          selectedTab = 'overview';
+          renderAll();
+        });
+      });
+    }
+    function column(titleZh, titleEn, content) { return `<section class="lineage-column"><h3>${escapeHtml(t(titleZh, titleEn))}</h3>${content || `<div class="empty">${t('暂无记录', 'No record')}</div>`}</section>`; }
+    function lineageCard(title, content) { return `<div class="lineage-card"><h4>${escapeHtml(title)}</h4>${content}</div>`; }
+    function compactJson(value) { return `<pre>${escapeHtml(JSON.stringify(value ?? {}, null, 2))}</pre>`; }
+    function simpleList(values) {
+      const entries = (values || []).filter(Boolean);
+      return entries.length ? `<ul class="list">${entries.map((value) => `<li>${escapeHtml(value)}</li>`).join('')}</ul>` : `<p class="muted">${t('无', 'None')}</p>`;
+    }
+    function tokenList(values, tone = '') {
+      const entries = (values || []).filter(Boolean);
+      return `<div class="token-list ${tone}">${entries.map((value) => `<span>${escapeHtml(value)}</span>`).join('')}</div>`;
+    }
+    function renderFixedDelivery(item) {
+      const delivery = item.lineage?.static_delivery || {};
+      return `<section class="delivery-fixed"><div class="media-deck">
+        ${mediaImageTile(delivery.mainline?.asset || finalOutputAsset(item), t('主线图片', 'Mainline image'), delivery.mainline?.provider || item.handheld.provider, true)}
+        ${mediaImageTile(delivery.planb?.asset || '', 'PlanB', delivery.planb?.provider || t('固定模板编译', 'Fixed template compiler'))}
+        ${mediaVideoTile(item)}
+      </div></section>`;
+    }
+    function renderPakNode(node) {
+      const payload = node.accepted_payload || {};
+      const namedValue = (value) => value && typeof value === 'object' ? `${value.name || '—'}${value.strength ? ` · ${value.strength}` : ''}` : (value || '—');
+      const accents = (payload.accent_colors || []).map(namedValue).join(', ');
+      const pakRows = [
+        ['anchor_id', payload.anchor_id],
+        ['exact_text', payload.exact_text?.text || payload.exact_text],
+        ['primary_object', namedValue(payload.primary_object)],
+        ['secondary_object', namedValue(payload.secondary_object)],
+        ['palette', [namedValue(payload.primary_color), namedValue(payload.secondary_color), accents].filter(Boolean).join(' / ')],
+        ['materials', Object.entries(payload.materials || {}).map(([key, value]) => `${key}: ${value}`).join(' · ')],
+      ];
+      return [
+        lineageCard('Pak JSON', kv(pakRows)),
+        lineageCard(t('入口边界', 'Input boundary'), `<div class="token-group"><strong>${t('接收字段', 'Accepted fields')}</strong>${tokenList(node.accepted_fields || [])}</div><div class="token-group"><strong>${t('明确丢弃', 'Explicitly discarded')}</strong>${tokenList(node.discarded_field_classes || [], 'discard')}</div>`),
+        lineageCard(t('进入工作流的数据', 'Data entering the workflow'), `<p>${t('只有 accepted_payload 会进入 Design Slots 标准化。reason、rationale、贴纸、截图、头像和任何证据字段不会进入设计判断。', 'Only accepted_payload enters Design Slots normalization. Reasons, rationales, stickers, frames, avatars, and all evidence fields are excluded from design decisions.')}</p>`),
+        lineageCard(t('下游消费者', 'Downstream consumer'), `<p>Design Slots schema validator</p>`),
+      ];
+    }
+    function renderSlotsNode(node) {
+      const rows = (node.fields || []).map((field) => {
+        const strength = field.strength && typeof field.strength === 'object'
+          ? [field.strength.primary ? `P ${field.strength.primary}` : '', field.strength.secondary ? `S ${field.strength.secondary}` : '', ...(field.strength.accents || []).map((value) => `A ${value}`)].filter(Boolean).join(' · ')
+          : (field.strength || '');
+        return `<div class="slot-row"><code>${escapeHtml(field.field)}</code><strong>${escapeHtml(field.value || '—')}</strong><span class="slot-evidence">${field.complete ? escapeHtml(strength || t('已锁定', 'Locked')) : t('缺失', 'Missing')}</span></div>`;
+      }).join('');
+      return [
+        lineageCard(t('上游输入', 'Upstream input'), `<p>${t('只接收 Pak JSON 字段白名单。', 'Accepts only the Pak JSON field whitelist.')}</p><p><strong>${t('转换模式：', 'Translation mode: ')}</strong>${escapeHtml(node.translation_mode || '')}</p>`),
+        lineageCard(t('标准化规则', 'Normalization rules'), `<p>${t('1:1 字段映射、命名统一与 schema 校验；不推测、不补设计、不读取媒体。', '1:1 field mapping, naming normalization, and schema validation. No inference, design completion, or media input.')}</p>`),
+        lineageCard(`5/5 Design Slots`, rows),
+        lineageCard(t('下游消费者', 'Downstream consumers'), simpleList([t('创意 LLM：锁定文本输入', 'Creative LLM: locked text-only inputs'), t('路由与 Prompt 编译', 'Routing and prompt compilation'), t('研发：schema 预检与 manifest 主键', 'Engineering: schema preflight and manifest keys')]))
+      ];
+    }
+    function renderCreativeNode(node) {
+      return [
+        lineageCard(t('锁定的文本输入', 'Locked text-only input'), kv([[t('输入模式', 'Input mode'), node.input_mode], [t('来源', 'Source'), node.actual_source], [t('Design Slots', 'Design Slots'), node.locked_inputs]])),
+        lineageCard(t('权限与规则', 'Scope & rules'), simpleList((node.rules || []).map((rule) => rule))),
+        lineageCard(t('允许的创意输出', 'Allowed creative outputs'), compactJson(node.outputs)),
+        lineageCard(t('Prompt 注入', 'Prompt injection'), statusInline(node.prompt_injected ? t('已注入最终 Prompt', 'Injected into final prompt') : t('未注入，正式步骤失败', 'Not injected; formal step failed'), node.prompt_injected ? 'ok' : 'fail')),
+      ];
+    }
+    function renderRoutingNode(node) {
+      const color = node.color || {}, material = node.material || {}, reference = node.reference || {}, chroma = node.chroma || {};
+      return [
+        lineageCard(t('编译输入', 'Compiler input'), kv([[t('Pak 原材料', 'Pak original materials'), material.original_materials], [t('原始颜色', 'Observed colors'), color.observed_input]])),
+        lineageCard(t('处理规则', 'Processing rules'), `<p>${t('颜色按“原始 → 路由审计 → 最终 Prompt Palette”分层；Pak 材料保持软锁定，只对非法角色或透明风险做确定性调整；Reference 只提供造型差异和姿态约束。', 'Colors remain separated as observed → routing audit → final prompt palette. Pak materials stay soft-locked and receive deterministic changes only for invalid roles or transparency risk. References supply shape diversity and pose constraints only.')}</p>`),
+        lineageCard(t('颜色与材质输出', 'Color & material output'), kv([[t('路由颜色', 'Routing colors'), color.routing_audit], [t('最终 Prompt Palette', 'Final prompt palette'), color.final_prompt_palette], [t('最终材料 ID', 'Final material IDs'), material.final_materials], [t('Prompt 材质语言', 'Prompt material terms'), material.prompt_terms || material.final_terms], [t('安全调整', 'Safety remap'), material.safety_remap], [t('调整原因', 'Reasons'), material.remap_reasons], [t('点缀覆盖', 'Accent coverage'), material.accent_coverage], [t('不透明背板', 'Opaque backing'), material.opaque_backing], [t('幕色', 'Chroma'), chroma]])) + lineageCard('Reference', kv([['reference_id', reference.selected_id], [t('角色', 'Role'), reference.selected_role], [t('选择原因', 'Reason'), reference.reason], [t('用途限制', 'Usage limit'), reference.rule]])) + (reference.selected_asset ? `<div class="lineage-card">${previewButton(reference.selected_asset, 'Reference', '')}</div>` : ''),
+        lineageCard(t('下游消费者', 'Downstream consumers'), simpleList(node.downstream)) + `<details><summary>${t('开发详情：Shape Router', 'Developer detail: Shape Router')}</summary>${compactJson(node.legacy_shape_trace)}</details>`,
+      ];
+    }
+    function promptBranchCard(label, branch, planb = false) {
+      const bypass = planb ? `<div class="bypass-list">${(branch.bypassed_stages || ['creative_llm','ordinary_router','ordinary_reference']).map((value) => badge(`${t('绕过', 'Bypass')} ${value}`, 'soft')).join('')}</div>` : '';
+      return `<div class="branch-card ${planb ? 'planb' : ''}"><h3>${escapeHtml(label)}</h3>${bypass}${kv([[t('输入', 'Inputs'), branch.inputs], [t('核心字段', 'Sections'), branch.sections || {}]])}<details><summary>${t('完整最终 Prompt', 'Full final prompt')}</summary><div class="prompt-actions"><button type="button" data-copy-lineage="${planb ? 'planb' : 'mainline'}">${t('复制 Prompt', 'Copy prompt')}</button></div><pre>${escapeHtml(branch.prompt || t('缺失', 'Missing'))}</pre></details></div>`;
+    }
+    function renderPromptNode(node) {
+      return [
+        lineageCard(t('编译输入', 'Compiler input'), `<p>${t('主线接收五槽、Creative LLM 输出、最终材质/Palette、Reference 与 chroma。PlanB 仅从锁定 Design Slots 独立编译严格模板。', 'Mainline receives the five slots, Creative LLM output, final materials/palette, reference, and chroma. PlanB independently compiles its strict template from locked Design Slots.')}</p>`),
+        lineageCard(t('分支规则', 'Branch rules'), `<p>${t('主线调用 Creative LLM 和主线路由；PlanB 不调用 Creative LLM、主线 Router 或主线 Reference。', 'Mainline uses Creative LLM and mainline routing. PlanB never calls Creative LLM, the mainline router, or mainline references.')}</p>`),
+        `<div class="lineage-card" style="grid-column:span 1"><div class="branch-grid">${promptBranchCard(t('主线 Prompt', 'Mainline prompt'), node.mainline || {})}${promptBranchCard('PlanB', {...(node.planb || {}), bypassed_stages: node.planb?.bypassed_stages}, true)}</div></div>`,
+        lineageCard(t('下游消费者', 'Downstream consumers'), simpleList(node.downstream)),
+      ];
+    }
+    function renderStaticNode(node) {
+      return [lineageCard(t('输入', 'Input'), `<p>${t('主线 Prompt 与 PlanB Prompt 分别提交给图片 provider。', 'Mainline and PlanB prompts are submitted separately to image providers.')}</p>`), lineageCard(t('执行规则', 'Execution rule'), `<p>${t('按 anchor_id 隔离状态；单行失败不终止整批；每条资产记录真实 key_color_hex。', 'Status is isolated by anchor_id. One row failure does not stop the batch. Every asset records its actual key_color_hex.')}</p>`), lineageCard(t('交付结果', 'Delivery output'), compactJson(node)), lineageCard(t('下游消费者', 'Downstream consumers'), simpleList(node.downstream))];
+    }
+    function renderVideoNode(node) {
+      return [lineageCard(t('输入', 'Input'), kv([['source_anchor_id', node.source_anchor_id], [t('主线图片', 'Mainline image'), node.source_image], [t('幕色', 'Chroma'), node.chroma]])), lineageCard(t('执行规则', 'Execution rule'), `<p>${t('Seedance 以主线最终图为输入，并继承同一 anchor_id 与 chroma 契约。', 'Seedance uses the final mainline image and inherits the same anchor_id and chroma contract.')}</p>`), lineageCard(t('交付结果', 'Delivery output'), kv([['status', node.status], ['provider', node.provider], ['model', node.model], [t('尺寸', 'Resolution'), node.resolution], [t('时长', 'Duration'), node.duration]])) + (node.prompt ? `<details><summary>${t('视频 Prompt', 'Video prompt')}</summary><pre>${escapeHtml(node.prompt)}</pre></details>` : ''), lineageCard(t('下游消费者', 'Downstream consumers'), simpleList(node.downstream))];
+    }
+    function renderNodeDetail(item) {
+      const node = item.lineage?.[selectedNode] || {};
+      const meta = (data.workflow_nodes || []).find((entry) => entry.id === selectedNode) || {};
+      const [tone, label] = nodeStatus(item, selectedNode);
+      let parts = [];
+      if (selectedNode === 'pak_input') parts = renderPakNode(node);
+      else if (selectedNode === 'design_slots') parts = renderSlotsNode(node);
+      else if (selectedNode === 'creative_llm') parts = renderCreativeNode(node);
+      else if (selectedNode === 'routing') parts = renderRoutingNode(node);
+      else if (selectedNode === 'prompt_compile') parts = renderPromptNode(node);
+      else parts = renderPromptNode(node);
+      return `<article class="record-detail"><header class="record-detail-head"><div><h3>${escapeHtml(uiLang === 'zh' ? meta.title_zh : meta.title_en)}</h3><p>${escapeHtml(uiLang === 'zh' ? meta.description_zh : meta.description_en)}</p></div>${statusInline(label, tone === 'failed' ? 'fail' : tone === 'succeeded' ? 'ok' : 'warn')}</header><div class="record-detail-body"><section class="record-context"><h4 class="record-pane-title">${t('输入与规则', 'Input & rules')}</h4>${parts[0] || ''}${parts[1] || ''}</section><section class="record-output"><h4 class="record-pane-title">${t('真实输出', 'Actual output')}</h4>${parts[2] || ''}</section></div><footer class="record-next"><strong>${t('交给下一步', 'Next')}</strong>${parts[3] || ''}</footer></article>`;
+    }
+    function renderGenerationRecord(item) {
+      const nodes = data.workflow_nodes || [];
+      const flow = nodes.map((node, index) => {
+        const [tone, label] = nodeStatus(item, node.id);
+        return `<button type="button" class="flow-node ${selectedNode === node.id ? 'active' : ''}" data-lineage-node="${escapeHtml(node.id)}" aria-pressed="${selectedNode === node.id}"><span class="step-index">${index + 1}</span><span class="step-title"><span>${escapeHtml(uiLang === 'zh' ? node.title_zh : node.title_en)}</span>${statusInline(label, tone === 'failed' ? 'fail' : tone === 'succeeded' ? 'ok' : 'warn')}</span><small>${escapeHtml(uiLang === 'zh' ? node.description_zh : node.description_en)}</small></button>`;
+      }).join('');
+      return `<section class="lineage-workspace"><div class="lineage-controls"><div><h3>${t('生成记录', 'Generation record')}</h3><p>${t('点击步骤查看该节点的真实输入与输出。', 'Select a step to inspect its actual input and output.')}</p></div></div><div class="lineage-flow">${flow}</div>${renderNodeDetail(item)}</section>`;
+    }
+    function renderDetail() {
+      const item = data.items[selectedIndex];
+      const identitySubtitle = `${item.design_slots.exact_text || t('文字缺失', 'Text missing')} · ${item.design_slots.primary_object || t('主物象缺失', 'Primary object missing')} + ${item.design_slots.secondary_object || t('次物象缺失', 'Secondary object missing')}`;
+      const formalStatus = mainlineStatus(item);
+      const statusTone = formalStatus === 'failed' ? 'fail' : formalStatus === 'retry_succeeded' ? 'warn' : 'ok';
+      const tabs = [
+        ['overview', t('概览', 'Overview')],
+        ['record', t('生成记录', 'Generation record')],
+        ['developer', t('开发详情', 'Developer')],
+      ];
+      document.getElementById('detail').innerHTML = `
+        <div class="identity-strip">
+          <div class="identity-main">${img(item.inputs.avatar_asset, t('主播头像', 'Creator avatar'))}<div><h2>${String(item.row_id).padStart(3, '0')} · ${escapeHtml(item.host_name)}</h2><p>${escapeHtml(identitySubtitle)}</p></div></div>
+          <div class="identity-status">${badge(`anchor_id · ${item.anchor_id}`, 'soft')}${statusInline(statusLabel(formalStatus), statusTone)}${statusInline(item.video?.status === 'succeeded' ? t('视频已生成', 'Video ready') : t('视频可选', 'Video optional'), item.video?.status === 'succeeded' ? 'ok' : '')}<span>${escapeHtml(item.handheld.provider || t('provider 缺失', 'Provider missing'))}</span></div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="${t('审核视图', 'Review views')}">${tabs.map(([key, label]) => `<button id="tab-${key}" role="tab" aria-selected="${selectedTab === key}" aria-controls="tabPanel" class="${selectedTab === key ? 'active' : ''}" data-tab="${key}">${label}</button>`).join('')}</div>
+        <div class="tab-content" id="tabPanel" role="tabpanel" aria-labelledby="tab-${selectedTab}">${renderTab(item)}</div>`;
+      document.querySelectorAll('[data-tab]').forEach((button) => button.addEventListener('click', () => { selectedTab = button.dataset.tab; renderDetail(); }));
+      document.querySelectorAll('[data-lineage-node]').forEach((button) => button.addEventListener('click', () => { selectedNode = button.dataset.lineageNode; renderDetail(); }));
+      wireLineageActions();
+      wireCopyButtons();
+      wirePreviewButtons();
+    }
+    function renderTab(item) {
+      if (selectedTab === 'overview') return renderOverview(item);
+      if (selectedTab === 'record') return renderGenerationRecord(item);
+      return renderDeveloperDetails(item);
+    }
+    function renderPrompts(item) {
+      if (hasCompareVariants(item)) {
+        return `<div class="two-col">${item.variants.map((variant, variantIndex) => `<section>
+          <h3>${escapeHtml(variant.label || t('输出', 'Output'))}</h3>
+          <p class="note">${escapeHtml(candidateSourceLabel(variant.visual_alt_source, variant.fallback_reason))} · ${escapeHtml(variant.candidate_policy_reason || '')}</p>
+          <div class="prompt-actions"><button data-copy="variantPrompt" data-variant-index="${variantIndex}" data-label="${t('复制 Prompt', 'Copy prompt')}">${t('复制 Prompt', 'Copy prompt')}</button><button data-copy="variantNegative" data-variant-index="${variantIndex}" data-label="${t('复制 Negative', 'Copy negative')}">${t('复制 Negative', 'Copy negative')}</button></div>
+          <pre>${escapeHtml(variant.prompt || t('缺失', 'Missing'))}</pre>
+          <details>
+            <summary>${t('展开 Negative Prompt', 'Show negative prompt')}</summary>
+            <pre>${escapeHtml(variant.negative_prompt || t('缺失', 'Missing'))}</pre>
+          </details>
+        </section>`).join('')}</div>`;
+      }
+      const cleanTitle = isOneStepItem(item) ? t('一步抠像幕手持 Prompt', 'One-step chroma handheld prompt') : 'Clean Image2 Prompt';
+      const handTitle = isOneStepItem(item) ? t('同一阶段 Prompt 记录', 'Same-stage prompt record') : t('手持 Prompt', 'Handheld prompt');
+      return `<div class="two-col">
+        <section>
+          <h3>${escapeHtml(cleanTitle)}</h3>
+          <div class="prompt-actions"><button data-copy="clean" data-label="${t('复制 Prompt', 'Copy prompt')}">${t('复制 Prompt', 'Copy prompt')}</button><button data-copy="cleanNeg" data-label="${t('复制 Negative', 'Copy negative')}">${t('复制 Negative', 'Copy negative')}</button></div>
+          <pre>${escapeHtml(item.prompts.clean || t('缺失', 'Missing'))}</pre>
+          <details>
+            <summary>${t('展开 Negative Prompt', 'Show negative prompt')}</summary>
+            <pre>${escapeHtml(item.prompts.clean_negative || t('缺失', 'Missing'))}</pre>
+          </details>
+        </section>
+        <section>
+          <h3>${escapeHtml(handTitle)}</h3>
+          <div class="prompt-actions"><button data-copy="handheld" data-label="${t('复制手持 Prompt', 'Copy handheld prompt')}">${t('复制手持 Prompt', 'Copy handheld prompt')}</button><button data-copy="handheldNeg" data-label="${t('复制手持 Negative', 'Copy handheld negative')}">${t('复制手持 Negative', 'Copy handheld negative')}</button></div>
+          <pre>${escapeHtml(item.prompts.handheld || t('缺失', 'Missing'))}</pre>
+          <details>
+            <summary>${t('展开手持 Negative Prompt', 'Show handheld negative prompt')}</summary>
+            <pre>${escapeHtml(item.prompts.handheld_negative || t('缺失', 'Missing'))}</pre>
+          </details>
+        </section>
+      </div>`;
+    }
+    function renderPayloads(item) {
+      if (hasCompareVariants(item)) {
+        return `<div class="two-col">${item.variants.map((variant) => `<section>
+          <h3>${escapeHtml(variant.label || t('输出', 'Output'))} · ${t('Payload 摘要', 'Payload summary')}</h3>
+          <pre>${escapeHtml(JSON.stringify(variant.payload || {}, null, 2))}</pre>
+        </section>`).join('')}</div>`;
+      }
+      const cleanTitle = isOneStepItem(item) ? t('一步请求 Payload 摘要', 'One-step payload summary') : t('Clean Payload 摘要', 'Clean payload summary');
+      const handTitle = isOneStepItem(item) ? t('同一请求 Payload 映射', 'Same-request payload mapping') : t('手持 Payload 摘要', 'Handheld payload summary');
+      return `<div class="two-col">
+        <section>
+          <h3>${escapeHtml(cleanTitle)}</h3>
+          <pre>${escapeHtml(JSON.stringify(item.payloads.clean, null, 2))}</pre>
+        </section>
+        <section>
+          <h3>${escapeHtml(handTitle)}</h3>
+          <pre>${escapeHtml(JSON.stringify(item.payloads.handheld, null, 2))}</pre>
+        </section>
+      </div>
+      <h4>${t('原始响应路径', 'Raw response paths')}</h4>
+      ${kv([
+        ['clean_raw_response', item.payloads.clean_raw_response_path],
+        ['handheld_raw_response', item.payloads.handheld_raw_response_path],
+      ])}`;
+    }
+    function renderDeveloperDetails(item) {
+      return `<div class="developer-stack">
+        <details open><summary>${t('Prompt 与 Negative', 'Prompts & negatives')}</summary><div class="details-body">${renderPrompts(item)}</div></details>
+        <details><summary>${t('安全 Payload 摘要', 'Safe payload summary')}</summary><div class="details-body">${renderPayloads(item)}</div></details>
+        <details><summary>${t('完整 Routing Trace', 'Full routing trace')}</summary><pre>${escapeHtml(JSON.stringify(item.route.trace_excerpt, null, 2))}</pre></details>
+        <details><summary>${t('生成状态与 Debug Card', 'Generation status & debug card')}</summary><div class="details-body">
+          ${kv([
+            [t('状态', 'Status'), statusLabel(item.handheld.status)],
+            [t('生成模式', 'Generation mode'), outputModeLabel(item.handheld.prompt_flow)],
+            [t('背景模板', 'Scene template'), item.handheld.scene_template],
+            ['Provider', item.handheld.provider],
+            [t('主 Run 错误', 'Main run error'), item.handheld.main_error],
+            [t('重试来源', 'Retry source'), item.handheld.retry_source],
+            ['clean_raw_response', item.payloads.clean_raw_response_path],
+            ['handheld_raw_response', item.payloads.handheld_raw_response_path],
+          ])}
+          <pre>${escapeHtml(item.debug_card_excerpt || t('缺失', 'Missing'))}</pre>
+        </div></details>
+        ${item.video?.prompt ? `<details><summary>${t('视频 Prompt', 'Video prompt')}</summary><pre>${escapeHtml(item.video.prompt)}</pre></details>` : ''}
+      </div>`;
+    }
+    function renderContractDrawer() {
+      document.getElementById('contractSubtitle').textContent = t('设计工作流唯一接受的 Design Slots 字段契约。', 'The Design Slots field contract exclusively accepted by the design workflow.');
+      document.getElementById('contractClose').textContent = t('关闭', 'Close');
+      document.getElementById('contractBody').innerHTML = (data.field_contract || []).map((field) => `<article class="contract-card">
+        <h3><code>${escapeHtml(field.field)}</code> ${badge(field.required ? t('必填', 'Required') : t('可选', 'Optional'), field.required ? 'ok' : 'soft')}</h3>
+        ${kv([[t('类型', 'Type'), field.type], [t('交付方', 'Delivered by'), field.owner], [t('Fallback', 'Fallback'), uiLang === 'zh' ? (field.fallback_zh || field.fallback) : field.fallback], [t('下游消费者', 'Downstream consumers'), uiLang === 'zh' ? (field.consumers_zh || field.consumers) : field.consumers], [t('示例', 'Example'), field.example]])}
+      </article>`).join('');
+    }
+    let contractReturnFocus = null;
+    let lightboxReturnFocus = null;
+    async function copyText(value) {
+      const text = value || '';
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+    }
+    function updateModalScrollLock() {
+      const anyOpen = document.getElementById('contractDrawer').classList.contains('open') || document.getElementById('lightbox').classList.contains('open');
+      document.body.classList.toggle('modal-open', anyOpen);
+    }
+    function trapDialogFocus(event, container) {
+      if (event.key !== 'Tab' || !container) return;
+      const focusable = Array.from(container.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])')).filter((element) => !element.disabled && element.getClientRects().length);
+      if (!focusable.length) { event.preventDefault(); container.focus(); return; }
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+    function openContractDrawer() {
+      renderContractDrawer();
+      const drawer = document.getElementById('contractDrawer');
+      contractReturnFocus = document.activeElement;
+      drawer.inert = false;
+      drawer.classList.add('open');
+      document.getElementById('contractBackdrop').classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.getElementById('contractBackdrop').setAttribute('aria-hidden', 'false');
+      updateModalScrollLock();
+      document.getElementById('contractClose').focus();
+    }
+    function closeContractDrawer() {
+      const drawer = document.getElementById('contractDrawer');
+      if (!drawer.classList.contains('open')) return;
+      drawer.classList.remove('open');
+      document.getElementById('contractBackdrop').classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      drawer.inert = true;
+      document.getElementById('contractBackdrop').setAttribute('aria-hidden', 'true');
+      updateModalScrollLock();
+      if (contractReturnFocus?.focus) contractReturnFocus.focus();
+      contractReturnFocus = null;
+    }
+    function downloadCurrentNode() {
+      const item = data.items[selectedIndex];
+      const payload = { viewer_data_version: data.viewer_data_version, anchor_id: item.anchor_id, node: selectedNode, data: item.lineage?.[selectedNode] || {} };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${item.anchor_id || item.row_id}_${selectedNode}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    function wireLineageActions() {
+      document.querySelectorAll('[data-copy-lineage]').forEach((button) => button.addEventListener('click', async () => {
+        const node = data.items[selectedIndex].lineage?.prompt_compile || {};
+        const branch = button.dataset.copyLineage === 'planb' ? node.planb : node.mainline;
+        await copyText(branch?.prompt || '');
+        const original = button.textContent;
+        button.textContent = t('已复制', 'Copied');
+        setTimeout(() => { button.textContent = original; }, 900);
+      }));
+    }
+    function wireCopyButtons() {
+      document.querySelectorAll('[data-copy]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const item = data.items[selectedIndex];
+          const map = {
+            clean: item.prompts.clean,
+            cleanNeg: item.prompts.clean_negative,
+            handheld: item.prompts.handheld,
+            handheldNeg: item.prompts.handheld_negative,
+          };
+          const variantIndex = Number(button.dataset.variantIndex || 0);
+          const variant = (item.variants || [])[variantIndex] || {};
+          const value = button.dataset.copy === 'variantPrompt'
+            ? variant.prompt
+            : button.dataset.copy === 'variantNegative'
+            ? variant.negative_prompt
+            : map[button.dataset.copy];
+          await copyText(value || '');
+          const original = button.dataset.label || button.textContent;
+          button.textContent = t('已复制', 'Copied');
+          setTimeout(() => { button.textContent = original; }, 900);
+        });
+      });
+    }
+    function wirePreviewButtons() {
+      document.querySelectorAll('[data-preview-src]').forEach((button) => {
+        if (button.dataset.previewBound === '1') return;
+        button.dataset.previewBound = '1';
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          openLightbox(button.dataset.previewSrc || '', button.dataset.previewTitle || '');
+        });
+      });
+    }
+    function openLightbox(src, title) {
+      if (!src) return;
+      const lightbox = document.getElementById('lightbox');
+      document.getElementById('lightboxImage').src = src;
+      document.getElementById('lightboxImage').alt = title;
+      document.getElementById('lightboxTitle').textContent = title;
+      lightboxReturnFocus = document.activeElement;
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      updateModalScrollLock();
+      document.getElementById('lightboxClose').focus();
+    }
+    function closeLightbox() {
+      const lightbox = document.getElementById('lightbox');
+      if (!lightbox.classList.contains('open')) return;
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.getElementById('lightboxImage').src = '';
+      updateModalScrollLock();
+      if (lightboxReturnFocus?.focus) lightboxReturnFocus.focus();
+      lightboxReturnFocus = null;
+    }
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox').addEventListener('click', (event) => {
+      if (event.target.id === 'lightbox') closeLightbox();
+    });
+    document.getElementById('contractClose').addEventListener('click', closeContractDrawer);
+    document.getElementById('contractBackdrop').addEventListener('click', closeContractDrawer);
+    document.addEventListener('keydown', (event) => {
+      const lightbox = document.getElementById('lightbox');
+      const drawer = document.getElementById('contractDrawer');
+      if (event.key === 'Escape') { if (lightbox.classList.contains('open')) closeLightbox(); else closeContractDrawer(); }
+      else if (lightbox.classList.contains('open')) trapDialogFocus(event, lightbox);
+      else if (drawer.classList.contains('open')) trapDialogFocus(event, drawer);
+    });
+    function renderReviewChrome() {
+      document.documentElement.lang = uiLang === 'zh' ? 'zh-CN' : 'en';
+      document.getElementById('pageTitle').textContent = 'Community Gift Review';
+      document.getElementById('pageSubtitle').textContent = t('先审核主线与 PlanB，再沿 Pak JSON → Design Slots → Creative LLM → Routing & Prompt → Image 查看真实记录。', 'Review the mainline and PlanB first, then inspect the actual Pak JSON → Design Slots → Creative LLM → Routing & Prompt → Image record.');
+      document.querySelector('.gallery-heading h2').textContent = t('礼物选择', 'Gift Selection');
+      document.querySelector('.gallery-heading p').textContent = t('选择主播，查看礼物资产和完整生成记录。', 'Select a creator to review gift assets and the complete generation record.');
+      document.getElementById('pagedMode').textContent = t('每页 10 个', '10 per page');
+      document.getElementById('allMode').textContent = t('全部展开', 'Show all');
+      document.getElementById('reviewTabLabel').textContent = t('结果审核台', 'Review');
+      document.getElementById('showcaseLink').textContent = t('礼物预览', 'Gift Preview');
+      document.getElementById('workflowLink').textContent = t('工作流画布', 'Workflow');
+      document.getElementById('lightboxClose').textContent = t('关闭', 'Close');
+      document.querySelectorAll('[data-review-lang]').forEach((button) => {
+        const active = button.dataset.reviewLang === uiLang;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+    }
+    function renderAll() {
+      const anchorId = String(data.items[selectedIndex]?.viewer_anchor_id || data.items[selectedIndex]?.anchor_id || '');
+      syncSelectionUrl();
+      document.getElementById('showcaseLink').href = linkedViewerHref(showcaseBaseHref, anchorId);
+      document.getElementById('workflowLink').href = linkedViewerHref(workflowBaseHref, anchorId);
+      renderReviewChrome();
+      renderSummary();
+      renderTimeline();
+      renderDetail();
+      renderGallery();
+    }
+    document.querySelectorAll('[data-review-lang]').forEach((button) => button.addEventListener('click', () => { uiLang = button.dataset.reviewLang; renderAll(); }));
+    document.getElementById('contractOpen').addEventListener('click', openContractDrawer);
+    renderAll();
+  </script>
+</body>
+</html>

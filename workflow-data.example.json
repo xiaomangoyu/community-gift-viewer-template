@@ -1,0 +1,1851 @@
+{
+  "viewer_data_version": 3,
+  "summary": {
+    "run_id": "demo-viewer-template",
+    "run_dir": "",
+    "retry_run_dir": "",
+    "streamers_dir": "",
+    "assets_dir": "",
+    "total_rows": 1,
+    "clean_success_rows": 0,
+    "handheld_success_rows": 0,
+    "retry_succeeded_rows": 0,
+    "creative_llm_failed_rows": 0,
+    "color_fallback_rows": 0,
+    "color_filtered_rows": 0,
+    "color_design_filled_rows": 0,
+    "chroma_remapped_rows": 0,
+    "chroma_screen_counts": {
+      "green_screen": 46,
+      "magenta_screen": 3,
+      "blue_screen": 1
+    },
+    "chroma_conflict_rows": 0,
+    "reference_unique_count": 0,
+    "reference_top_id": "hat_mv_silver",
+    "reference_top_count": 0,
+    "reference_top_share": 0.1,
+    "reference_concentration_risk": false,
+    "reference_semantic_rows": 0,
+    "reference_style_only_rows": 0,
+    "reference_fallback_rows": 0,
+    "provider": "gpt_image_2",
+    "scene_template": "blue_screen, green_screen, magenta_screen",
+    "output_mode": "one_step_handheld_chroma",
+    "input_contract": "design_slots_v1",
+    "prompt_flow_counts": {
+      "one_step_handheld_chroma": 50
+    },
+    "compare_enabled": true,
+    "planb_enabled": true,
+    "planb_run_dir": "",
+    "planb_label": "PlanB 经典方案",
+    "ab_compare_enabled": false,
+    "compare_run_dir": "",
+    "run_label": "Mainline 定制方案",
+    "compare_label": "PlanB 经典方案",
+    "variant_summaries": [
+      {
+        "label": "Mainline 定制方案",
+        "total_rows": 50,
+        "final_success_rows": 50,
+        "providers": [
+          "gpt_image_2"
+        ],
+        "status_counts": {
+          "succeeded": 50
+        },
+        "visual_alt_rows": 0,
+        "fallback_template_rows": 0
+      },
+      {
+        "label": "PlanB 经典方案",
+        "total_rows": 50,
+        "final_success_rows": 50,
+        "providers": [
+          "gpt_image_2"
+        ],
+        "status_counts": {
+          "succeeded": 50
+        },
+        "visual_alt_rows": 0,
+        "fallback_template_rows": 0
+      }
+    ],
+    "video_run_dir": "",
+    "review_context_enabled": true,
+    "review_context_rows": 1,
+    "review_context_stickers": 721,
+    "showcase_copy_rows": 1,
+    "matting_run_enabled": false,
+    "matting_complete_branches": 0,
+    "video_success_rows": 0,
+    "video_failed_rows": 0,
+    "pak_input_rows": 1,
+    "slot_complete_rows": 1
+  },
+  "workflow_nodes": [
+    {
+      "id": "pak_input",
+      "owner": "pak",
+      "title_zh": "Pak JSON",
+      "title_en": "Pak JSON",
+      "description_zh": "只接收生成所需字段；reason、证据和媒体不进入设计工作流",
+      "description_en": "Accepts generation fields only; reasons, evidence, and media never enter the design workflow"
+    },
+    {
+      "id": "design_slots",
+      "owner": "pak",
+      "title_zh": "Design Slots 标准化",
+      "title_en": "Design Slots normalization",
+      "description_zh": "字段映射与 schema 校验，不重新推测设计",
+      "description_en": "Field mapping and schema validation without re-inferring the design"
+    },
+    {
+      "id": "creative_llm",
+      "owner": "design",
+      "title_zh": "创意 LLM",
+      "title_en": "Creative LLM",
+      "description_zh": "只扩写轮廓、融合、材质落位与握柄",
+      "description_en": "Expands silhouette, fusion, material application, and handle"
+    },
+    {
+      "id": "routing",
+      "owner": "design",
+      "title_zh": "路由与安全编译",
+      "title_en": "Routing & safety compile",
+      "description_zh": "颜色、材质、Reference、Chroma 与 provider 决策",
+      "description_en": "Color, material, reference, chroma, and provider decisions"
+    },
+    {
+      "id": "prompt_compile",
+      "owner": "design",
+      "title_zh": "最终 Prompt",
+      "title_en": "Final prompts",
+      "description_zh": "主线 Prompt 与 PlanB Prompt 的真实模型输入",
+      "description_en": "Actual model inputs for the mainline and PlanB branches"
+    }
+  ],
+  "field_contract": [
+    {
+      "field": "anchor_id",
+      "type": "string",
+      "required": true,
+      "owner": "Pak Data Mining",
+      "fallback": "none; duplicate or empty IDs fail preflight",
+      "fallback_zh": "无兜底；重复或空 ID 在预检阶段失败",
+      "consumers": [
+        "static manifest",
+        "video manifest",
+        "Viewer"
+      ],
+      "consumers_zh": [
+        "静态 manifest",
+        "视频 manifest",
+        "Viewer"
+      ],
+      "example": "118930683485462528"
+    },
+    {
+      "field": "exact_text",
+      "type": "{text}",
+      "required": true,
+      "owner": "Pak Data Mining",
+      "fallback": "Pak must deliver a final value; fan club name then host name may be resolved upstream",
+      "fallback_zh": "Pak 必须交付最终值；上游可按粉丝团名、主播名顺序完成解析",
+      "consumers": [
+        "creative lock",
+        "mainline prompt",
+        "PlanB prompt"
+      ],
+      "consumers_zh": [
+        "创意锁定输入",
+        "主线 Prompt",
+        "PlanB Prompt"
+      ],
+      "example": "CHEMIST3"
+    },
+    {
+      "field": "primary_object",
+      "type": "{name, strength}",
+      "required": true,
+      "owner": "Pak Data Mining",
+      "fallback": "none; Pak must deliver a non-empty final value",
+      "fallback_zh": "无兜底；Pak 必须交付非空最终值",
+      "consumers": [
+        "Creative LLM",
+        "reference routing",
+        "mainline prompt"
+      ],
+      "consumers_zh": [
+        "创意 LLM",
+        "Reference 路由",
+        "主线 Prompt"
+      ],
+      "example": "猫耳"
+    },
+    {
+      "field": "secondary_object",
+      "type": "{name, strength}",
+      "required": true,
+      "owner": "Pak Data Mining",
+      "fallback": "none; Pak must deliver a non-empty final value",
+      "fallback_zh": "无兜底；Pak 必须交付非空最终值",
+      "consumers": [
+        "Creative LLM",
+        "reference routing",
+        "mainline prompt"
+      ],
+      "consumers_zh": [
+        "创意 LLM",
+        "Reference 路由",
+        "主线 Prompt"
+      ],
+      "example": "护片"
+    },
+    {
+      "field": "palette",
+      "type": "primary_color + secondary_color + accent_colors[]",
+      "required": true,
+      "owner": "Pak Data Mining",
+      "fallback": "required from Pak; all product black routes to deep graphite gray; explicit oversaturation is softened",
+      "fallback_zh": "Pak 必填；所有产品黑色统一路由为深石墨灰；明确过饱和描述做同色相软化",
+      "consumers": [
+        "color audit",
+        "material/color library",
+        "mainline and PlanB palette"
+      ],
+      "consumers_zh": [
+        "颜色审计",
+        "材质/颜色库",
+        "主线与 PlanB Palette"
+      ],
+      "example": "莓酒红 / 霓虹紫 / [柔白, 暖金]"
+    },
+    {
+      "field": "materials",
+      "type": "object",
+      "required": true,
+      "owner": "Pak Data Mining",
+      "fallback": "none; Pak must deliver all three material roles",
+      "fallback_zh": "无兜底；Pak 必须交付三个材料角色",
+      "consumers": [
+        "material safety compiler",
+        "mainline prompt"
+      ],
+      "consumers_zh": [
+        "材料安全编译器",
+        "主线 Prompt"
+      ],
+      "example": "glossy_resin / matte_rubber / brushed_metal_trim"
+    }
+  ],
+  "items": [
+    {
+      "key": "demo-row-001",
+      "row_id": 1,
+      "anchor_id": "0000000000000000001",
+      "host_name": "Demo Creator",
+      "community_name": "Demo Community",
+      "input_contract": "design_slots_v1",
+      "design_slots": {
+        "anchor_id": "0000000000000000001",
+        "exact_text": "Demo Club",
+        "primary_object": "tiger",
+        "secondary_object": "strawberry",
+        "primary_color": "purple",
+        "secondary_color": "orange",
+        "accent_colors": [
+          "cyan",
+          "black"
+        ],
+        "materials": {
+          "main": "glossy_resin",
+          "supporting": "matte_rubber",
+          "accent": "soft_emissive_panel"
+        }
+      },
+      "design_slots_delivery": {
+        "anchor_id": "0000000000000000001",
+        "exact_text": {
+          "text": "Demo Club"
+        },
+        "primary_object": {
+          "name": "tiger",
+          "strength": "high"
+        },
+        "secondary_object": {
+          "name": "strawberry",
+          "strength": "medium"
+        },
+        "primary_color": {
+          "name": "purple",
+          "strength": "high"
+        },
+        "secondary_color": {
+          "name": "orange",
+          "strength": "medium"
+        },
+        "accent_colors": [
+          {
+            "name": "cyan",
+            "strength": "medium"
+          },
+          {
+            "name": "black",
+            "strength": "medium"
+          }
+        ],
+        "materials": {
+          "main": "glossy_resin",
+          "supporting": "matte_rubber",
+          "accent": "soft_emissive_panel"
+        }
+      },
+      "inputs": {
+        "folder": "<local-path-omitted>",
+        "avatar_path": "<local-path-omitted>",
+        "avatar_asset": ""
+      },
+      "vision": {
+        "path": "",
+        "source": "host_vision",
+        "palette": {
+          "family": "Design Slots 锁定配色",
+          "main_color": "purple",
+          "secondary_color": "orange",
+          "accent_colors": [
+            "cyan",
+            "black"
+          ],
+          "tags": []
+        },
+        "materials": {
+          "main": "",
+          "supporting": "",
+          "tags": []
+        },
+        "material_application": "glossy_resin用于灯头主体外轮廓与主要鼓起结构，形成饱满兽首感与果实般通透鼓面；matte_rubber用于握柄包覆、防滑分区、局部转折过渡与底盖触感区，使手持稳定且削弱灯头与握柄连接处的生硬感；soft_emissive_panel嵌入灯头正面核心发光区、耳缘内侧小面积导光区以及与次物象相关的籽点/切片感细节中，形成分区发光而非整块泛白。",
+        "text": {
+          "exact_text": "Demo Club",
+          "source": "design_slots",
+          "script": "latin",
+          "style_hint": "“Demo Club”采用圆润微爪痕感字形，文字不外扩成独立物象，沿正面下缘或握柄上段竖向排布；整体为柔和发光描边配局部高亮面，字面可用低饱和冷光衬托，避免抢过主体轮廓。"
+        },
+        "lamp_head_silhouette": "灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。",
+        "silhouette_language": "圆润、饱满、对称、幼态兽感中带果实弹性，避免尖刺和过细悬挑，以大曲面和浅层浮雕建立主次层级。",
+        "signature_symbols": {
+          "primary": "tiger",
+          "secondary": "strawberry",
+          "source": "design_slots"
+        },
+        "theme_forms": {
+          "primary": {
+            "symbol": "tiger",
+            "position": "灯头上半部居中主导",
+            "forms": [
+              "以简化虎首为主轮廓，头顶略宽、下缘收拢，形成稳定可制造的识别外形",
+              "双耳做成圆角三角突起，控制厚度避免过尖",
+              "额头与两侧用浅浮雕条纹表达兽感，不增加新主题",
+              "脸部不做人脸写实，仅保留抽象兽面分区与对称结构"
+            ]
+          },
+          "secondary": {
+            "symbol": "strawberry",
+            "position": "包裹灯头下半部并向连接段过渡",
+            "forms": [
+              "以下宽上收的草莓果身曲线补足虎首下缘，使整体从上部兽首自然过渡到下部果形",
+              "表面用均匀浅凹籽点作为次级纹理，控制在边缘和下半区，不压过虎纹",
+              "顶部叶冠可简化为连接虎首下缘的包托结构，不独立长出第三主题感",
+              "果实鼓面可作为主要透光基底，让主体更有甜感和体量"
+            ]
+          },
+          "fusion_note": "整体采用“上虎下莓”的一体化结构：虎首负责识别性轮廓，草莓负责下半部体积与甜感纹理，二者通过共同的圆润外缘与连续曲面融合，避免像两个部件硬拼。"
+        },
+        "style_pitch": "甜酷果兽感",
+        "lighting": "主发光集中在灯头正面中央至下半部，形成均匀果冻感面光；耳内侧与少量籽点细节做次级点状或短条导光，增强层次；边缘保留一定非发光区，让虎耳、虎纹和草莓籽点在亮起与熄灭时都清晰可辨。整体建议冷暖对比弱化，保持梦幻甜酷而不过分刺眼。",
+        "mood": {
+          "phrase": "奶凶甜闪",
+          "tags": [
+            "可爱",
+            "甜酷",
+            "果冻感",
+            "轻潮玩"
+          ]
+        },
+        "handle": {
+          "main_material": "matte_rubber",
+          "surface_treatment": "细磨砂防滑，主杆保持简洁直筒并在上段做轻微收腰，便于单手握持；可加入浅凹环纹提升抓握稳定性。",
+          "connector_detail": "连接段以短颈过渡至灯头，下宽上窄的圆角套环结构包覆接口，视觉上承接草莓下缘并隐藏装配缝。",
+          "bottom_cap": "底盖做圆角胶囊形收尾，略微外扩防滑落，可保留低调发光点或非发光压纹，不另起新主题造型。",
+          "decoration_continuation": "握柄装饰延续灯头的虎纹/草莓籽点语言，但仅以浅压纹或窄环带出现；靠近上段可呼应主体的条纹节奏，下段则更简洁，确保文字与主体仍是视觉核心。"
+        },
+        "image_source": "text_only",
+        "final_symbols": {
+          "primary": "tiger",
+          "secondary": "strawberry"
+        }
+      },
+      "host_brief": {
+        "path": "",
+        "summary": {
+          "row_id": 1,
+          "host_name": "Demo Creator 🐅",
+          "community_name": "Demo Club",
+          "symbols_raw": [
+            "tiger",
+            "strawberry"
+          ],
+          "primary_symbol": "tiger",
+          "secondary_symbol": "strawberry",
+          "symbol_resolution_trace": [
+            {
+              "source_symbol": "tiger",
+              "canonical_object": "tiger",
+              "canonical_objects": [
+                "tiger"
+              ],
+              "source_type": "pak_top",
+              "status": "resolved",
+              "evidence": [
+                "design_slots.primary_object"
+              ],
+              "reason": "locked Design Slots consensus",
+              "accepted": true,
+              "accepted_objects": [
+                "tiger"
+              ]
+            },
+            {
+              "source_symbol": "strawberry",
+              "canonical_object": "strawberry",
+              "canonical_objects": [
+                "strawberry"
+              ],
+              "source_type": "pak_top",
+              "status": "resolved",
+              "evidence": [
+                "design_slots.secondary_object"
+              ],
+              "reason": "locked Design Slots consensus",
+              "accepted": true,
+              "accepted_objects": [
+                "strawberry"
+              ]
+            }
+          ],
+          "slot_selection_source": "pak_top_direct",
+          "slot_fallback_used": false,
+          "primary_color": "purple",
+          "_truncated": true
+        }
+      },
+      "route": {
+        "creative_llm": {
+          "source": "creative_llm",
+          "input_mode": "text_only",
+          "prompt_injected": true,
+          "error": ""
+        },
+        "color": {
+          "palette_id": "design_slots_bounded_safety",
+          "fallback_used": false,
+          "input_primary_color": "purple",
+          "input_secondary_color": "orange",
+          "color_source": "pak_design_slots",
+          "color_audit_status": "bounded_safety_compile",
+          "audited_primary_color": "purple",
+          "audited_secondary_color": "orange",
+          "accent_colors": [
+            "cyan",
+            "deep graphite gray"
+          ],
+          "rejected_colors": [],
+          "color_policy_reason": "preserve order and hue; soften only absolute black or explicit oversaturation",
+          "chroma_policy_applied": false,
+          "chroma_unsafe_colors": [],
+          "chroma_safe_replacements": [],
+          "chroma_policy_reason": "",
+          "reason": "formal Design Slots compile directly through bounded color safety"
+        },
+        "shape": {
+          "matched_rule_id": "default",
+          "silhouette": "iconic sculpted lamp head",
+          "reason": "no shape rule matched; using defaults"
+        },
+        "reference": {
+          "reference_id": "basketball_tiger_sport",
+          "reference_rule": "semantic_weighted_top_n",
+          "score": "",
+          "matched_tags": {},
+          "matched_dimensions": [],
+          "specific_matched_tags": {},
+          "generic_matched_tags": {},
+          "match_strength": "",
+          "reference_policy_reason": "",
+          "top_candidates": [
+            {
+              "id": "basketball_tiger_sport",
+              "score": 4.66,
+              "match_strength": "semantic",
+              "specific_matched_tags": {
+                "shape": [
+                  "tiger"
+                ],
+                "color": [
+                  "orange"
+                ]
+              },
+              "generic_matched_tags": {
+                "vibe": [
+                  "cute"
+                ],
+                "text": [
+                  "latin"
+                ]
+              },
+              "reference_policy_reason": "Specific semantic evidence is strong enough for this reference."
+            },
+            {
+              "id": "cat_maru_paw_glow",
+              "score": 1.44,
+              "match_strength": "style_only",
+              "specific_matched_tags": {
+                "color": [
+                  "purple"
+                ]
+              },
+              "generic_matched_tags": {
+                "vibe": [
+                  "cute"
+                ],
+                "text": [
+                  "latin",
+                  "short"
+                ]
+              },
+              "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+            },
+            {
+              "id": "fire_plush_torch",
+              "score": 1.44,
+              "match_strength": "style_only",
+              "specific_matched_tags": {
+                "color": [
+                  "orange"
+                ]
+              },
+              "generic_matched_tags": {
+                "vibe": [
+                  "cute"
+                ],
+                "text": [
+                  "latin",
+                  "short"
+                ]
+              },
+              "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+            },
+            {
+              "id": "sticker_ghost_soft",
+              "score": 1.44,
+              "match_strength": "style_only",
+              "specific_matched_tags": {
+                "color": [
+                  "purple"
+                ]
+              },
+              "generic_matched_tags": {
+                "vibe": [
+                  "cute"
+                ],
+                "text": [
+                  "latin",
+                  "short"
+                ]
+              },
+              "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+            }
+          ],
+          "fallback_used": false
+        },
+        "material": {
+          "material_source": "pak_input",
+          "original_materials": {
+            "main": "glossy_resin",
+            "supporting": "matte_rubber",
+            "accent": "soft_emissive_panel"
+          },
+          "final_materials": {
+            "main": "glossy_resin",
+            "supporting": "matte_rubber",
+            "accent": "soft_emissive_panel"
+          },
+          "prompt_terms": [
+            "柔亮不透明树脂主体",
+            "亲肤哑光软橡胶辅件",
+            "小面积柔光发光内芯，配不透明背板"
+          ],
+          "safety_remap": {},
+          "remap_reasons": [],
+          "accent_coverage": "small",
+          "opaque_backing": true,
+          "solid_outer_edge": false,
+          "transparency_risk_check": {
+            "status": "passed",
+            "issues": []
+          },
+          "material_pair": "柔亮不透明树脂主体、亲肤哑光软橡胶辅件、小面积柔光发光内芯，配不透明背板",
+          "main_material": "柔亮不透明树脂主体",
+          "supporting_material": "亲肤哑光软橡胶辅件",
+          "accent_material": "小面积柔光发光内芯，配不透明背板",
+          "material_family_main": "opaque_resin",
+          "material_family_supporting": "soft_rubber",
+          "material_profile": "pak_soft_locked",
+          "material_policy_reason": "Pak material IDs are soft-locked; only invalid-role and explicit transparency safety rules may adjust them"
+        },
+        "design_slot_safety": {
+          "objects": {
+            "primary": {
+              "original_object": "tiger",
+              "final_object": "tiger",
+              "changed": false,
+              "reason": "pak_object_passthrough"
+            },
+            "secondary": {
+              "original_object": "strawberry",
+              "final_object": "strawberry",
+              "changed": false,
+              "reason": "pak_object_passthrough"
+            }
+          },
+          "palette": {
+            "original_colors": [
+              "purple",
+              "orange",
+              "cyan",
+              "black"
+            ],
+            "final_colors": [
+              "purple",
+              "orange",
+              "cyan",
+              "deep graphite gray"
+            ],
+            "adjustments": [
+              {
+                "original": "black",
+                "final": "deep graphite gray",
+                "reason": "black_routed_to_deep_graphite_gray"
+              }
+            ],
+            "warnings": [],
+            "policy": "preserve_order_and_hue; route_all_black_to_deep_graphite_gray; soften_explicit_oversaturation"
+          },
+          "warnings": []
+        },
+        "candidate": {
+          "candidate_mode": "",
+          "original_primary_symbol": "",
+          "original_secondary_symbol": "",
+          "visual_alt_source": "",
+          "effective_primary_symbol": "",
+          "effective_secondary_symbol": "",
+          "candidate_policy_reason": "",
+          "fallback_reason": ""
+        },
+        "slot_resolution": {
+          "slot_policy": "pak_top_strict_original_order",
+          "selection_source": "pak_top_direct",
+          "fallback_used": false,
+          "policy_order": [
+            "1. 按 Pak Top 原始顺序逐项检查，不重排",
+            "2. 具体符号直接采用；歧义符号只做证据约束下的同义规范化",
+            "3. 重复、不可视化或无证据项记录原因后跳过",
+            "4. 遍历完整个 Pak 列表仍不足两个槽位，才依次使用 characterization、sticker、avatar"
+          ],
+          "pak_top_symbols_original_order": [
+            {
+              "symbol": "tiger",
+              "category": "parsed"
+            },
+            {
+              "symbol": "strawberry",
+              "category": "parsed"
+            }
+          ],
+          "pak_priority_symbols_used_by_workflow": [
+            "tiger",
+            "strawberry"
+          ],
+          "ordered_symbol_decisions": [
+            {
+              "source_symbol": "tiger",
+              "canonical_object": "tiger",
+              "canonical_objects": [
+                "tiger"
+              ],
+              "source_type": "pak_top",
+              "status": "resolved",
+              "evidence": [
+                "design_slots.primary_object"
+              ],
+              "reason": "locked Design Slots consensus",
+              "accepted": true,
+              "accepted_objects": [
+                "tiger"
+              ]
+            },
+            {
+              "source_symbol": "strawberry",
+              "canonical_object": "strawberry",
+              "canonical_objects": [
+                "strawberry"
+              ],
+              "source_type": "pak_top",
+              "status": "resolved",
+              "evidence": [
+                "design_slots.secondary_object"
+              ],
+              "reason": "locked Design Slots consensus",
+              "accepted": true,
+              "accepted_objects": [
+                "strawberry"
+              ]
+            }
+          ],
+          "community_tiebreak_applied": false,
+          "pak_semantic_translation": {
+            "form_exploration": [],
+            "characterization_excerpt": "",
+            "top_stickers_text": []
+          },
+          "creative_translation": {
+            "primary": "tiger",
+            "secondary": "strawberry",
+            "source": "design_slots",
+            "style_pitch": "甜酷果兽感",
+            "lamp_head_silhouette": "灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。"
+          },
+          "final_primary": "tiger",
+          "final_secondary": "strawberry",
+          "final_reason": "两个槽位均来自 Pak Top 原始顺序；未采用项不参与后续 reference 匹配。 最终主视觉='tiger'，次视觉='strawberry'。"
+        },
+        "trace_excerpt": {
+          "color": {
+            "matched_rule_id": "design_slots_bounded_safety",
+            "fields": {
+              "palette_id": "design_slots_bounded_safety",
+              "palette_name": "Pak Design Slots Palette",
+              "fallback_used": false,
+              "input_primary_color": "purple",
+              "input_secondary_color": "orange",
+              "main_color": "purple",
+              "palette": [
+                "purple",
+                "orange",
+                "cyan",
+                "deep graphite gray"
+              ],
+              "materials": [],
+              "_truncated": true
+            },
+            "trace": []
+          },
+          "shape": {
+            "matched_rule_id": "default",
+            "fields": {
+              "silhouette": "iconic sculpted lamp head",
+              "theme_title": "个性符号感 × 舞台应援感 × 收藏级偶像周边风",
+              "mood": "个性鲜明、舞台感",
+              "symbol_translation": "将「tiger」转译为灯头外轮廓、包边、冠饰、翅片、波形、花瓣、大体块结构或边缘切面",
+              "supporting_translation": "将「strawberry」仅作为小型浮雕、边缘节点、晶体镶嵌、局部发光细节或底座压纹，不要变成第二个主视觉",
+              "text_style": "文字区偏偶像灯牌和频道标题感，保持干净、饱满、有局部内发光",
+              "bottom_node": "加入与「tiger」相关的压纹、徽章、护片、切面或流线装饰件",
+              "silhouette_language": "圆润、完整、包裹、上扬、柔亮或利落的实体结构",
+              "_truncated": true
+            },
+            "trace": [
+              {
+                "rule_id": "hat",
+                "matched": false,
+                "reason": "",
+                "skipped_because": "derived.primary_symbol_text='tiger' contains none of ['帽', 'hat', 'sombrero', 'fedora']"
+              },
+              {
+                "rule_id": "butterfly",
+                "matched": false,
+                "reason": "",
+                "skipped_because": "derived.primary_symbol_text='tiger' contains none of ['蝴蝶', 'butterfly', '나비']"
+              },
+              {
+                "rule_id": "bird_wing",
+                "matched": false,
+                "reason": "",
+                "skipped_because": "derived.primary_symbol_text='tiger' contains none of ['羽翼', 'wing', 'feather', '鸟', 'bird', '翅膀', '乌鸦', '黑鸟', 'crow', 'raven']"
+              },
+              {
+                "rule_id": "crown",
+                "matched": false,
+                "reason": "",
+                "skipped_because": "derived.primary_symbol_text='tiger' contains none of ['皇冠', '王冠', 'crown', 'queen', 'king', 'rey']"
+              }
+            ]
+          },
+          "reference": {
+            "matched_rule_id": "semantic_weighted_top_n",
+            "fields": {
+              "picks": [
+                {
+                  "id": "basketball_tiger_sport",
+                  "image_path": "",
+                  "role_description": "Demo content omitted from the public template.",
+                  "score": 4.66,
+                  "matched_tags": {
+                    "shape": [
+                      "tiger"
+                    ],
+                    "color": [
+                      "orange"
+                    ],
+                    "vibe": [
+                      "cute"
+                    ],
+                    "text": [
+                      "latin"
+                    ]
+                  },
+                  "matched_dimensions": [
+                    "color",
+                    "shape",
+                    "text",
+                    "vibe"
+                  ],
+                  "specific_matched_tags": {
+                    "shape": [
+                      "tiger"
+                    ],
+                    "color": [
+                      "orange"
+                    ]
+                  },
+                  "generic_matched_tags": {
+                    "vibe": [
+                      "cute"
+                    ],
+                    "text": [
+                      "latin"
+                    ]
+                  },
+                  "_truncated": true
+                }
+              ],
+              "top_candidates": [
+                {
+                  "id": "basketball_tiger_sport",
+                  "score": 4.66,
+                  "match_strength": "semantic",
+                  "specific_matched_tags": {
+                    "shape": [
+                      "tiger"
+                    ],
+                    "color": [
+                      "orange"
+                    ]
+                  },
+                  "generic_matched_tags": {
+                    "vibe": [
+                      "cute"
+                    ],
+                    "text": [
+                      "latin"
+                    ]
+                  },
+                  "reference_policy_reason": "Specific semantic evidence is strong enough for this reference."
+                },
+                {
+                  "id": "cat_maru_paw_glow",
+                  "score": 1.44,
+                  "match_strength": "style_only",
+                  "specific_matched_tags": {
+                    "color": [
+                      "purple"
+                    ]
+                  },
+                  "generic_matched_tags": {
+                    "vibe": [
+                      "cute"
+                    ],
+                    "text": [
+                      "latin",
+                      "short"
+                    ]
+                  },
+                  "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+                },
+                {
+                  "id": "fire_plush_torch",
+                  "score": 1.44,
+                  "match_strength": "style_only",
+                  "specific_matched_tags": {
+                    "color": [
+                      "orange"
+                    ]
+                  },
+                  "generic_matched_tags": {
+                    "vibe": [
+                      "cute"
+                    ],
+                    "text": [
+                      "latin",
+                      "short"
+                    ]
+                  },
+                  "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+                },
+                {
+                  "id": "sticker_ghost_soft",
+                  "score": 1.44,
+                  "match_strength": "style_only",
+                  "specific_matched_tags": {
+                    "color": [
+                      "purple"
+                    ]
+                  },
+                  "generic_matched_tags": {
+                    "vibe": [
+                      "cute"
+                    ],
+                    "text": [
+                      "latin",
+                      "short"
+                    ]
+                  },
+                  "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+                }
+              ],
+              "fallback_used": false,
+              "top_n": 1
+            },
+            "trace": [
+              {
+                "rule_id": "butterfly_korean",
+                "matched": false,
+                "reason": "score=1.2 | color:purple | strength=style_only | specific=color:purple | ignored due to target script conflict | Specific evidence is too thin for shape transfer.",
+                "skipped_because": "reference text script conflicts with target script; Specific evidence is too thin for shape transfer."
+              },
+              {
+                "rule_id": "mascot_cherry_jelly",
+                "matched": true,
+                "reason": "score=0.2 | vibe:cute | text:latin,short | strength=style_only | generic=vibe:cute;text:latin,short | Only generic tags matched; use orientation/proportion only.",
+                "skipped_because": "Only generic tags matched; use orientation/proportion only."
+              },
+              {
+                "rule_id": "boxer2_street_glove",
+                "matched": true,
+                "reason": "score=1.4 | color:purple | text:latin,short | strength=style_only | specific=color:purple | generic=text:latin,short | Specific evidence is too thin for shape transfer.",
+                "skipped_because": "Specific evidence is too thin for shape transfer."
+              },
+              {
+                "rule_id": "pink_hair_bull_star",
+                "matched": true,
+                "reason": "score=0.2 | text:latin,short | strength=style_only | generic=text:latin,short | Only generic tags matched; use orientation/proportion only.",
+                "skipped_because": "Only generic tags matched; use orientation/proportion only."
+              }
+            ]
+          },
+          "style_controls": {
+            "wildness_score": 0,
+            "creativity_score": 0,
+            "aggression_delta": 0,
+            "effective_creativity": 0,
+            "confidence": "low",
+            "shape_boosts": [],
+            "vibe_boosts": [],
+            "material_boosts": [],
+            "_truncated": true
+          },
+          "prompt_lint": {
+            "prompt_chars": 1947,
+            "exact_text": "Demo Club",
+            "exact_text_count": 3,
+            "primary_symbol": "tiger",
+            "primary_symbol_count": 3,
+            "quoted_non_exact_cjk_terms": [],
+            "negative_marker_count": 11,
+            "text_danger_counts": {},
+            "_truncated": true
+          }
+        }
+      },
+      "effect": {
+        "effect_id": "heart_lightstick_prompt_library_v2",
+        "effect_name": "心形应援棒 Prompt 母版 v2",
+        "confidence": 0.0,
+        "reason": "Fallback approved effect; no strong term match yet.",
+        "matched_terms": []
+      },
+      "compiled": {
+        "prompt_plan": {
+          "effect_id": "heart_lightstick_prompt_library_v2",
+          "camera_contract": [
+            "pure black background",
+            "single full-body lightstick",
+            "front to very slight 3/4 studio product view",
+            "complete handle and compact bottom cap"
+          ],
+          "product_contract": [
+            "dominant lamp head",
+            "streamer nameplate inside the lamp-head shape",
+            "central luminous core",
+            "connector ring"
+          ],
+          "material_terms": [
+            "柔亮不透明树脂主体",
+            "亲肤哑光软橡胶辅件",
+            "小面积柔光发光内芯，配不透明背板"
+          ],
+          "color_terms": [
+            "purple",
+            "orange",
+            "cyan",
+            "deep graphite gray"
+          ],
+          "retained_elements": [
+            "tiger",
+            "strawberry"
+          ],
+          "banned_elements": [],
+          "retry_focus": []
+        },
+        "color_plan": "purple, orange, cyan, deep graphite gray",
+        "material_language": [
+          "柔亮不透明树脂主体",
+          "亲肤哑光软橡胶辅件",
+          "小面积柔光发光内芯，配不透明背板"
+        ],
+        "composition": "Single centered full-body product render on pure black, with complete handle and bottom cap.",
+        "required_elements": [
+          "single full-body lightstick",
+          "pure black background",
+          "exact streamer name inside the lamp-head shape",
+          "tiger"
+        ],
+        "negative_constraints": []
+      },
+      "references": [],
+      "prompts": {
+        "clean": "Demo content omitted from the public template.",
+        "clean_negative": "Demo content omitted from the public template.",
+        "handheld": "Demo content omitted from the public template.",
+        "handheld_negative": "Demo content omitted from the public template."
+      },
+      "payloads": {
+        "clean": {
+          "file_path": "",
+          "status": "missing"
+        },
+        "handheld": {
+          "file_path": "",
+          "status": "missing"
+        },
+        "clean_raw_response_path": "",
+        "handheld_raw_response_path": ""
+      },
+      "outputs": {
+        "clean": {
+          "source_path": "",
+          "asset": ""
+        },
+        "handheld": {
+          "source_path": "",
+          "asset": ""
+        }
+      },
+      "handheld": {
+        "status": "succeeded",
+        "provider": "gpt_image_2",
+        "scene_template": "green_screen",
+        "prompt_flow": "one_step_handheld_chroma",
+        "chroma_screen": {
+          "mode": "green_screen",
+          "key_color_hex": "#00FF00",
+          "selection_source": "cli_override",
+          "detected_color_families": [
+            "green",
+            "blue"
+          ],
+          "conflict": true,
+          "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+        },
+        "main_error": "",
+        "retry_source": ""
+      },
+      "video": {
+        "status": "succeeded",
+        "provider": "seedance2",
+        "model": "ep-20260309100637-kvgfg",
+        "duration": 5,
+        "resolution": "720p",
+        "audio_policy": "silent",
+        "prompt": "Demo content omitted from the public template.",
+        "chroma_screen": {
+          "mode": "green_screen",
+          "key_color_hex": "#00FF00",
+          "selection_source": "cli_override",
+          "detected_color_families": [
+            "green",
+            "blue"
+          ],
+          "conflict": true,
+          "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+        },
+        "source_image": "",
+        "source_path": "",
+        "asset": "",
+        "error": ""
+      },
+      "debug_card_excerpt": "",
+      "viewer_anchor_id": "demo-gift-001",
+      "variants": [
+        {
+          "label": "Mainline 定制方案",
+          "provider": "gpt_image_2",
+          "status": "succeeded",
+          "prompt_flow": "one_step_handheld_chroma",
+          "chroma_screen": {
+            "mode": "green_screen",
+            "key_color_hex": "#00FF00",
+            "selection_source": "cli_override",
+            "detected_color_families": [
+              "green",
+              "blue"
+            ],
+            "conflict": true,
+            "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+          },
+          "final_asset": "",
+          "final_source_path": "<local-path-omitted>",
+          "clean_asset": "",
+          "reference_id": "basketball_tiger_sport",
+          "palette_id": "design_slots_bounded_safety",
+          "color_audit_status": "bounded_safety_compile",
+          "audited_primary_color": "purple",
+          "audited_secondary_color": "orange",
+          "candidate_mode": "",
+          "visual_alt_source": "",
+          "effective_primary_symbol": "",
+          "effective_secondary_symbol": "",
+          "candidate_policy_reason": "",
+          "fallback_reason": "",
+          "prompt": "Demo content omitted from the public template.",
+          "negative_prompt": "Demo content omitted from the public template.",
+          "payload": {
+            "file_path": "",
+            "status": "missing"
+          }
+        },
+        {
+          "label": "PlanB 经典方案",
+          "provider": "gpt_image_2",
+          "status": "succeeded",
+          "prompt_flow": "one_step_handheld_chroma",
+          "chroma_screen": {
+            "mode": "green_screen",
+            "key_color_hex": "#00FF00",
+            "selection_source": "cli_override",
+            "detected_color_families": [
+              "green",
+              "blue"
+            ],
+            "conflict": true,
+            "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+          },
+          "final_asset": "",
+          "final_source_path": "<local-path-omitted>",
+          "clean_asset": "",
+          "reference_id": "",
+          "palette_id": "",
+          "color_audit_status": "",
+          "audited_primary_color": "",
+          "audited_secondary_color": "",
+          "candidate_mode": "",
+          "visual_alt_source": "",
+          "effective_primary_symbol": "",
+          "effective_secondary_symbol": "",
+          "candidate_policy_reason": "",
+          "fallback_reason": "",
+          "prompt": "Demo content omitted from the public template.",
+          "negative_prompt": "Demo content omitted from the public template.",
+          "payload": {
+            "file_path": "",
+            "status": "missing"
+          }
+        }
+      ],
+      "review_context": {
+        "available": true,
+        "display_only": true,
+        "source": "asset_lab_review_context",
+        "creator": {
+          "nick_name": "Demo Creator 🐅",
+          "fans_club_name": "Demo Creator’s 🐅’s",
+          "bio_description": "Venmo: Demo Creatorvatore-Cusumano-1\nLIVE Everyday [10-2am CST]\nLinktree Below\n🐅"
+        },
+        "description": {
+          "zh": "???????????????",
+          "en": "A fictional example used to demonstrate the review layout."
+        },
+        "avatar_asset": "",
+        "stickers": []
+      },
+      "showcase": {
+        "copy": {
+          "status": "succeeded",
+          "creator_description": {
+            "zh": "???????? Viewer ???????????????????????????????",
+            "en": "This fictional creator introduction demonstrates the Viewer layout. Replace it with project data during the build step."
+          },
+          "element_reason": {
+            "zh": "???????????????????????",
+            "en": "A star and a sparkle demonstrate element tags and rationale layout."
+          },
+          "color_reason": {
+            "zh": "???????????????????????",
+            "en": "Purple, gold, and cyan demonstrate palette chips and rationale text."
+          }
+        },
+        "matting": {
+          "mainline": {
+            "status": "missing",
+            "icon": {
+              "status": "missing",
+              "asset": ""
+            },
+            "gift_panel": {
+              "status": "missing",
+              "asset": ""
+            },
+            "video": {
+              "status": "missing",
+              "asset": ""
+            }
+          },
+          "planb": {
+            "status": "missing",
+            "icon": {
+              "status": "missing",
+              "asset": ""
+            },
+            "gift_panel": {
+              "status": "missing",
+              "asset": ""
+            },
+            "video": {
+              "status": "missing",
+              "asset": ""
+            }
+          }
+        }
+      },
+      "lineage": {
+        "pak_input": {
+          "owner": "Pak Data Mining",
+          "actual_source": "pak_json",
+          "accepted": true,
+          "accepted_payload": {
+            "anchor_id": "0000000000000000001",
+            "exact_text": {
+              "text": "Demo Club"
+            },
+            "primary_object": {
+              "name": "tiger",
+              "strength": "high"
+            },
+            "secondary_object": {
+              "name": "strawberry",
+              "strength": "medium"
+            },
+            "primary_color": {
+              "name": "purple",
+              "strength": "high"
+            },
+            "secondary_color": {
+              "name": "orange",
+              "strength": "medium"
+            },
+            "accent_colors": [
+              {
+                "name": "cyan",
+                "strength": "medium"
+              },
+              {
+                "name": "black",
+                "strength": "medium"
+              }
+            ],
+            "materials": {
+              "main": "glossy_resin",
+              "supporting": "matte_rubber",
+              "accent": "soft_emissive_panel"
+            }
+          },
+          "accepted_fields": [
+            "anchor_id",
+            "exact_text.text",
+            "primary_object.name/strength",
+            "secondary_object.name/strength"
+          ],
+          "discarded_field_classes": [
+            "reason / rationale",
+            "evidence refs / source type",
+            "stickers / frames / avatars as design evidence",
+            "LLM score / token counts / media counts"
+          ],
+          "rule": "field whitelist only; no design inference at the Pak adapter boundary"
+        },
+        "design_slots": {
+          "owner": "Design workflow",
+          "contract_owner": "Design workflow",
+          "actual_source": "pak_json_normalization",
+          "translation_mode": "one_to_one_field_mapping",
+          "inference_allowed": false,
+          "fields": [
+            {
+              "field": "exact_text",
+              "value": "Demo Club",
+              "strength": "",
+              "required": true,
+              "owner": "Design workflow",
+              "complete": true
+            },
+            {
+              "field": "primary_object",
+              "value": "tiger",
+              "strength": "high",
+              "required": true,
+              "owner": "Design workflow",
+              "complete": true
+            },
+            {
+              "field": "secondary_object",
+              "value": "strawberry",
+              "strength": "medium",
+              "required": true,
+              "owner": "Design workflow",
+              "complete": true
+            },
+            {
+              "field": "palette",
+              "value": "purple / orange / cyan / black",
+              "strength": {
+                "primary": "high",
+                "secondary": "medium",
+                "accents": [
+                  "medium",
+                  "medium"
+                ]
+              },
+              "required": true,
+              "owner": "Design workflow",
+              "complete": true
+            }
+          ],
+          "complete": true,
+          "accent_colors": [
+            "cyan",
+            "black"
+          ],
+          "materials": {
+            "main": "glossy_resin",
+            "supporting": "matte_rubber",
+            "accent": "soft_emissive_panel"
+          },
+          "rejected_field_classes": [
+            "reason",
+            "rationale",
+            "evidence",
+            "media"
+          ]
+        },
+        "creative_llm": {
+          "owner": "Design Linyi",
+          "actual_source": "creative_llm",
+          "input_mode": "text_only",
+          "prompt_injected": true,
+          "status": "succeeded",
+          "error": "",
+          "locked_inputs": {
+            "exact_text": "Demo Club",
+            "primary_object": "tiger",
+            "secondary_object": "strawberry",
+            "palette": "purple / orange / cyan / black",
+            "materials": "glossy_resin / matte_rubber / soft_emissive_panel"
+          },
+          "outputs": {
+            "style_pitch": "甜酷果兽感",
+            "lamp_head_silhouette": "灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。",
+            "silhouette_language": "圆润、饱满、对称、幼态兽感中带果实弹性，避免尖刺和过细悬挑，以大曲面和浅层浮雕建立主次层级。",
+            "theme_forms": {
+              "primary": {
+                "symbol": "tiger",
+                "position": "灯头上半部居中主导",
+                "forms": [
+                  "以简化虎首为主轮廓，头顶略宽、下缘收拢，形成稳定可制造的识别外形",
+                  "双耳做成圆角三角突起，控制厚度避免过尖",
+                  "额头与两侧用浅浮雕条纹表达兽感，不增加新主题",
+                  "脸部不做人脸写实，仅保留抽象兽面分区与对称结构"
+                ]
+              },
+              "secondary": {
+                "symbol": "strawberry",
+                "position": "包裹灯头下半部并向连接段过渡",
+                "forms": [
+                  "以下宽上收的草莓果身曲线补足虎首下缘，使整体从上部兽首自然过渡到下部果形",
+                  "表面用均匀浅凹籽点作为次级纹理，控制在边缘和下半区，不压过虎纹",
+                  "顶部叶冠可简化为连接虎首下缘的包托结构，不独立长出第三主题感",
+                  "果实鼓面可作为主要透光基底，让主体更有甜感和体量"
+                ]
+              },
+              "fusion_note": "整体采用“上虎下莓”的一体化结构：虎首负责识别性轮廓，草莓负责下半部体积与甜感纹理，二者通过共同的圆润外缘与连续曲面融合，避免像两个部件硬拼。"
+            },
+            "material_proposal": {},
+            "material_application": "glossy_resin用于灯头主体外轮廓与主要鼓起结构，形成饱满兽首感与果实般通透鼓面；matte_rubber用于握柄包覆、防滑分区、局部转折过渡与底盖触感区，使手持稳定且削弱灯头与握柄连接处的生硬感；soft_emissive_panel嵌入灯头正面核心发光区、耳缘内侧小面积导光区以及与次物象相关的籽点/切片感细节中，形成分区发光而非整块泛白。",
+            "locked_materials": {
+              "main": "glossy_resin",
+              "supporting": "matte_rubber",
+              "accent": "soft_emissive_panel"
+            },
+            "materials_locked": true,
+            "handle": {
+              "main_material": "matte_rubber",
+              "surface_treatment": "细磨砂防滑，主杆保持简洁直筒并在上段做轻微收腰，便于单手握持；可加入浅凹环纹提升抓握稳定性。",
+              "connector_detail": "连接段以短颈过渡至灯头，下宽上窄的圆角套环结构包覆接口，视觉上承接草莓下缘并隐藏装配缝。",
+              "bottom_cap": "底盖做圆角胶囊形收尾，略微外扩防滑落，可保留低调发光点或非发光压纹，不另起新主题造型。",
+              "decoration_continuation": "握柄装饰延续灯头的虎纹/草莓籽点语言，但仅以浅压纹或窄环带出现；靠近上段可呼应主体的条纹节奏，下段则更简洁，确保文字与主体仍是视觉核心。"
+            },
+            "lighting": "主发光集中在灯头正面中央至下半部，形成均匀果冻感面光；耳内侧与少量籽点细节做次级点状或短条导光，增强层次；边缘保留一定非发光区，让虎耳、虎纹和草莓籽点在亮起与熄灭时都清晰可辨。整体建议冷暖对比弱化，保持梦幻甜酷而不过分刺眼。",
+            "mood": {
+              "phrase": "奶凶甜闪",
+              "tags": [
+                "可爱",
+                "甜酷",
+                "果冻感",
+                "轻潮玩"
+              ]
+            },
+            "text_treatment": {
+              "exact_text": "Demo Club",
+              "source": "design_slots",
+              "script": "latin",
+              "style_hint": "“Demo Club”采用圆润微爪痕感字形，文字不外扩成独立物象，沿正面下缘或握柄上段竖向排布；整体为柔和发光描边配局部高亮面，字面可用低饱和冷光衬托，避免抢过主体轮廓。"
+            }
+          },
+          "rules": [
+            "five core Design Slots are immutable",
+            "Pak material IDs are soft-locked; Creative LLM may only describe application",
+            "Creative LLM input mode is text-only",
+            "Creative LLM output must be injected into the final prompt"
+          ],
+          "downstream": [
+            "design compiler",
+            "material router",
+            "reference router",
+            "mainline prompt"
+          ]
+        },
+        "routing": {
+          "owner": "Design Linyi",
+          "actual_source": "deterministic_rules_and_libraries",
+          "color": {
+            "observed_input": [
+              "purple",
+              "orange",
+              "cyan",
+              "black"
+            ],
+            "routing_audit": [
+              "purple",
+              "orange"
+            ],
+            "audit_status": "bounded_safety_compile",
+            "palette_rule": "design_slots_bounded_safety",
+            "final_prompt_palette": [
+              "purple",
+              "orange",
+              "cyan",
+              "deep graphite gray"
+            ],
+            "reason": "preserve order and hue; soften only absolute black or explicit oversaturation",
+            "rejected_colors": [],
+            "safety_adjustments": [
+              {
+                "original": "black",
+                "final": "deep graphite gray",
+                "reason": "black_routed_to_deep_graphite_gray"
+              }
+            ],
+            "warnings": []
+          },
+          "objects": {
+            "primary": {
+              "original_object": "tiger",
+              "final_object": "tiger",
+              "changed": false,
+              "reason": "pak_object_passthrough"
+            },
+            "secondary": {
+              "original_object": "strawberry",
+              "final_object": "strawberry",
+              "changed": false,
+              "reason": "pak_object_passthrough"
+            }
+          },
+          "material": {
+            "creative_proposal": {
+              "main": "",
+              "supporting": "",
+              "tags": []
+            },
+            "material_source": "pak_input",
+            "original_materials": {
+              "main": "glossy_resin",
+              "supporting": "matte_rubber",
+              "accent": "soft_emissive_panel"
+            },
+            "final_materials": {
+              "main": "glossy_resin",
+              "supporting": "matte_rubber",
+              "accent": "soft_emissive_panel"
+            },
+            "prompt_terms": [
+              "柔亮不透明树脂主体",
+              "亲肤哑光软橡胶辅件",
+              "小面积柔光发光内芯，配不透明背板"
+            ],
+            "safety_remap": {},
+            "remap_reasons": [],
+            "accent_coverage": "small",
+            "opaque_backing": true,
+            "solid_outer_edge": false,
+            "transparency_risk_check": {
+              "status": "passed",
+              "issues": []
+            },
+            "profile": "pak_soft_locked",
+            "main": "柔亮不透明树脂主体",
+            "supporting": "亲肤哑光软橡胶辅件",
+            "accent": "小面积柔光发光内芯，配不透明背板",
+            "final_terms": [
+              "柔亮不透明树脂主体",
+              "亲肤哑光软橡胶辅件",
+              "小面积柔光发光内芯，配不透明背板"
+            ],
+            "reason": "Pak material IDs are soft-locked; only invalid-role and explicit transparency safety rules may adjust them"
+          },
+          "reference": {
+            "selected_id": "basketball_tiger_sport",
+            "selected_asset": "",
+            "selected_role": "Demo content omitted from the public template.",
+            "match_strength": "",
+            "rule": "semantic_weighted_top_n",
+            "reason": "",
+            "top_candidates": [
+              {
+                "id": "basketball_tiger_sport",
+                "score": 4.66,
+                "match_strength": "semantic",
+                "specific_matched_tags": {
+                  "shape": [
+                    "tiger"
+                  ],
+                  "color": [
+                    "orange"
+                  ]
+                },
+                "generic_matched_tags": {
+                  "vibe": [
+                    "cute"
+                  ],
+                  "text": [
+                    "latin"
+                  ]
+                },
+                "reference_policy_reason": "Specific semantic evidence is strong enough for this reference."
+              },
+              {
+                "id": "cat_maru_paw_glow",
+                "score": 1.44,
+                "match_strength": "style_only",
+                "specific_matched_tags": {
+                  "color": [
+                    "purple"
+                  ]
+                },
+                "generic_matched_tags": {
+                  "vibe": [
+                    "cute"
+                  ],
+                  "text": [
+                    "latin",
+                    "short"
+                  ]
+                },
+                "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+              },
+              {
+                "id": "fire_plush_torch",
+                "score": 1.44,
+                "match_strength": "style_only",
+                "specific_matched_tags": {
+                  "color": [
+                    "orange"
+                  ]
+                },
+                "generic_matched_tags": {
+                  "vibe": [
+                    "cute"
+                  ],
+                  "text": [
+                    "latin",
+                    "short"
+                  ]
+                },
+                "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+              },
+              {
+                "id": "sticker_ghost_soft",
+                "score": 1.44,
+                "match_strength": "style_only",
+                "specific_matched_tags": {
+                  "color": [
+                    "purple"
+                  ]
+                },
+                "generic_matched_tags": {
+                  "vibe": [
+                    "cute"
+                  ],
+                  "text": [
+                    "latin",
+                    "short"
+                  ]
+                },
+                "reference_policy_reason": "Specific evidence is too thin for shape transfer."
+              }
+            ]
+          },
+          "chroma": {
+            "mode": "green_screen",
+            "key_color_hex": "#00FF00",
+            "selection_source": "cli_override",
+            "detected_color_families": [
+              "green",
+              "blue"
+            ],
+            "conflict": true,
+            "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+          },
+          "silhouette_source": "creative_llm",
+          "legacy_shape_trace": {
+            "matched_rule_id": "default",
+            "silhouette": "iconic sculpted lamp head",
+            "reason": "no shape rule matched; using defaults"
+          },
+          "downstream": [
+            "mainline prompt",
+            "PlanB palette",
+            "chroma contract"
+          ]
+        },
+        "prompt_compile": {
+          "owner": "Design Linyi",
+          "actual_source": "deterministic_prompt_compiler",
+          "mainline": {
+            "inputs": {
+              "design_slots": {
+                "exact_text": "Demo Club",
+                "primary_object": "tiger",
+                "secondary_object": "strawberry",
+                "palette": "purple / orange / cyan / black",
+                "materials": "glossy_resin / matte_rubber / soft_emissive_panel"
+              },
+              "silhouette": "灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。",
+              "reference_id": "basketball_tiger_sport",
+              "chroma": {
+                "mode": "green_screen",
+                "key_color_hex": "#00FF00",
+                "selection_source": "cli_override",
+                "detected_color_families": [
+                  "green",
+                  "blue"
+                ],
+                "conflict": true,
+                "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+              }
+            },
+            "sections": {
+              "text": "Demo Club",
+              "structure": {
+                "primary": {
+                  "symbol": "tiger",
+                  "position": "灯头上半部居中主导",
+                  "forms": [
+                    "以简化虎首为主轮廓，头顶略宽、下缘收拢，形成稳定可制造的识别外形",
+                    "双耳做成圆角三角突起，控制厚度避免过尖",
+                    "额头与两侧用浅浮雕条纹表达兽感，不增加新主题",
+                    "脸部不做人脸写实，仅保留抽象兽面分区与对称结构"
+                  ]
+                },
+                "secondary": {
+                  "symbol": "strawberry",
+                  "position": "包裹灯头下半部并向连接段过渡",
+                  "forms": [
+                    "以下宽上收的草莓果身曲线补足虎首下缘，使整体从上部兽首自然过渡到下部果形",
+                    "表面用均匀浅凹籽点作为次级纹理，控制在边缘和下半区，不压过虎纹",
+                    "顶部叶冠可简化为连接虎首下缘的包托结构，不独立长出第三主题感",
+                    "果实鼓面可作为主要透光基底，让主体更有甜感和体量"
+                  ]
+                },
+                "fusion_note": "整体采用“上虎下莓”的一体化结构：虎首负责识别性轮廓，草莓负责下半部体积与甜感纹理，二者通过共同的圆润外缘与连续曲面融合，避免像两个部件硬拼。"
+              },
+              "silhouette": "灯头为上宽下收的圆角盾形轮廓，顶部左右各一枚圆角虎耳突起，下半部外轮廓带草莓果身的饱满下坠感，底部中央略收形成与握柄连接的颈部；整体左右对称、厚度适中、可注塑/浇筑实现。",
+              "palette": [
+                "purple",
+                "orange",
+                "cyan",
+                "deep graphite gray"
+              ],
+              "materials": [
+                "柔亮不透明树脂主体",
+                "亲肤哑光软橡胶辅件",
+                "小面积柔光发光内芯，配不透明背板"
+              ],
+              "handle": {
+                "main_material": "matte_rubber",
+                "surface_treatment": "细磨砂防滑，主杆保持简洁直筒并在上段做轻微收腰，便于单手握持；可加入浅凹环纹提升抓握稳定性。",
+                "connector_detail": "连接段以短颈过渡至灯头，下宽上窄的圆角套环结构包覆接口，视觉上承接草莓下缘并隐藏装配缝。",
+                "bottom_cap": "底盖做圆角胶囊形收尾，略微外扩防滑落，可保留低调发光点或非发光压纹，不另起新主题造型。",
+                "decoration_continuation": "握柄装饰延续灯头的虎纹/草莓籽点语言，但仅以浅压纹或窄环带出现；靠近上段可呼应主体的条纹节奏，下段则更简洁，确保文字与主体仍是视觉核心。"
+              },
+              "composition": "Single centered full-body product render on pure black, with complete handle and bottom cap."
+            },
+            "prompt": "Demo content omitted from the public template.",
+            "negative_prompt": "Demo content omitted from the public template."
+          },
+          "planb": {
+            "enabled": true,
+            "actual_source": "strict_template_compiler",
+            "uses_creative_llm": false,
+            "inputs": {
+              "exact_text": "Demo Club",
+              "locked_palette": "purple / orange / cyan / black",
+              "chroma": {
+                "mode": "green_screen",
+                "key_color_hex": "#00FF00",
+                "selection_source": "cli_override",
+                "detected_color_families": [
+                  "green",
+                  "blue"
+                ],
+                "conflict": true,
+                "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+              },
+              "template": ""
+            },
+            "bypassed_stages": [
+              "creative_llm",
+              "mainline_router",
+              "mainline_reference"
+            ],
+            "prompt": "Demo content omitted from the public template.",
+            "negative_prompt": "Demo content omitted from the public template."
+          },
+          "downstream": [
+            "mainline image provider",
+            "PlanB image provider"
+          ]
+        },
+        "static_delivery": {
+          "owner": "Engineering",
+          "actual_source": "image_providers",
+          "mainline": {
+            "label": "Mainline 定制方案",
+            "status": "succeeded",
+            "provider": "gpt_image_2",
+            "model": "",
+            "size": "",
+            "quality": "",
+            "asset": "",
+            "chroma": {
+              "mode": "green_screen",
+              "key_color_hex": "#00FF00",
+              "selection_source": "cli_override",
+              "detected_color_families": [
+                "green",
+                "blue"
+              ],
+              "conflict": true,
+              "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+            }
+          },
+          "planb": {
+            "label": "PlanB 经典方案",
+            "status": "succeeded",
+            "provider": "gpt_image_2",
+            "model": "",
+            "size": "",
+            "quality": "",
+            "asset": "",
+            "chroma": {
+              "mode": "green_screen",
+              "key_color_hex": "#00FF00",
+              "selection_source": "cli_override",
+              "detected_color_families": [
+                "green",
+                "blue"
+              ],
+              "conflict": true,
+              "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+            }
+          },
+          "downstream": [
+            "Seedance video",
+            "product delivery",
+            "chroma key pipeline"
+          ]
+        },
+        "video_delivery": {
+          "owner": "Engineering",
+          "actual_source": "seedance2",
+          "source_anchor_id": "0000000000000000001",
+          "source_image": "",
+          "status": "succeeded",
+          "provider": "seedance2",
+          "model": "ep-20260309100637-kvgfg",
+          "duration": 5,
+          "resolution": "720p",
+          "audio_policy": "silent",
+          "chroma": {
+            "mode": "green_screen",
+            "key_color_hex": "#00FF00",
+            "selection_source": "cli_override",
+            "detected_color_families": [
+              "green",
+              "blue"
+            ],
+            "conflict": true,
+            "conflict_reason": "Selected green key family is also present in the final product/glove palette; product colors were preserved and downstream keying may need a tighter tolerance or manual override."
+          },
+          "prompt": "Demo content omitted from the public template.",
+          "asset": "",
+          "error": "",
+          "downstream": [
+            "product delivery",
+            "external chroma key pipeline"
+          ]
+        }
+      }
+    }
+  ]
+}
