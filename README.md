@@ -6,7 +6,7 @@ The repository preserves the reusable page structure and interactions without in
 
 ## Included pages
 
-- `index.html` — creator profile, design rationale, stickers, live-room frame placeholders, Mainline delivery, and PlanB preview.
+- `index.html` — creator profile, brand strength, design rationale, stickers, live-room frames, Mainline delivery, and PlanB preview.
 - `review.html` — detailed result review and trace inspection.
 - `workflow.html` — workflow and field-contract visualization.
 - `START_WINDOWS_SERVER.bat` — one-click Windows LAN server.
@@ -39,8 +39,8 @@ The demo deliberately contains no real creator identity, production prompt, loca
 
 Use the standard-library injection tool:
 
-```bash
-python tools/inject_data.py ^
+```bat
+python tools\inject_data.py ^
   --showcase path\to\showcase-data.json ^
   --workflow path\to\workflow-data.json ^
   --output dist
@@ -68,11 +68,41 @@ The gift preview uses two IDs:
 - `anchor_id` — stable Viewer navigation ID.
 - `source_anchor_id` — source-system Anchor ID displayed in the creator profile.
 
-Optional delivery fields include:
+The creator profile supports three rationale cards:
+
+- `element_reason` — why the primary and secondary elements were selected.
+- `color_reason` — why the palette was selected.
+- `text_rationale` — why `design.exact_text` was selected.
+
+Brand strength comes directly from `pak_metadata.llm_tier` and accepts:
+
+```text
+weak < medium < strong < exceptional
+```
+
+It controls both the profile badge and the low-to-high/high-to-low sorting options.
+
+Example optional fields:
 
 ```json
 {
-  "anchor_frames": [],
+  "text_rationale": {
+    "en": "The slogan uses the official fan club name."
+  },
+  "text_rationale_sources": [
+    {"type": "anchor_field", "source_id": "fans_club_name"}
+  ],
+  "pak_metadata": {
+    "llm_tier": "strong",
+    "llm_score": 82,
+    "fallback_slots": 0
+  },
+  "curated_stickers": [
+    {"asset": "workflow_viewer_assets/stickers/example.png"}
+  ],
+  "anchor_frames": [
+    {"asset": "workflow_viewer_assets/frames/example.jpg"}
+  ],
   "matting": {
     "mainline": {
       "status": "missing",
@@ -88,6 +118,8 @@ Optional delivery fields include:
 }
 ```
 
+Use `curated_stickers` for the Pak-selected sticker list. The Viewer only limits the legacy uncurated `stickers` fallback to seven items. `anchor_frames`, `live_room_frames`, and `frames` are accepted aliases for live-room screenshots.
+
 Media paths should be relative URLs such as:
 
 ```text
@@ -99,4 +131,3 @@ workflow_viewer_assets/matting_outputs/videos/example.mp4
 ## Repository policy
 
 Binary media and generated packages are intentionally ignored. This repository stores the Viewer implementation and public data contracts only.
-

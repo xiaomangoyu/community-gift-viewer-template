@@ -32,6 +32,12 @@
     .gift-search input { width:100%; min-height:33px; padding:6px 10px; border:1px solid #e2e4e8; border-radius:8px; color:var(--text); background:rgba(255,255,255,.86); font-size:11px; outline:0; transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease; }
     .gift-search input::placeholder { color:var(--tertiary); }
     .gift-search input:focus { border-color:#9ecbfa; background:#fff; box-shadow:0 0 0 3px rgba(0,113,227,.08); }
+    .strength-sort { position:relative; flex:0 0 auto; }
+    .strength-sort::after { content:"⌄"; position:absolute; top:50%; right:9px; transform:translateY(-56%); color:var(--tertiary); font-size:12px; pointer-events:none; }
+    .strength-sort select { min-height:33px; padding:6px 26px 6px 10px; border:1px solid #e2e4e8; border-radius:8px; color:var(--text); background:#fff; font-size:11px; outline:0; appearance:none; cursor:pointer; transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease; }
+    .strength-sort select:hover { border-color:#b7d8fb; }
+    .strength-sort select:focus { border-color:#9ecbfa; box-shadow:0 0 0 3px rgba(0,113,227,.08); }
+    .strength-sort select:active { transform:translateY(1px); }
     .mode-toggle { display:inline-flex; padding:2px; border-radius:8px; background:#eceef1; }
     .mode-toggle button { min-height:29px; padding:4px 9px; border:0; border-radius:6px; color:var(--muted); background:transparent; font-size:11px; cursor:pointer; transition:color .18s ease,background-color .18s ease,box-shadow .2s ease,transform .22s cubic-bezier(.2,.8,.2,1); }
     .mode-toggle button[aria-pressed="true"] { color:var(--text); background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.06); }
@@ -65,7 +71,14 @@
     .creator-avatar img { width:100%; height:100%; object-fit:cover; }
     .creator-avatar button { width:100%; height:100%; padding:0; border:0; background:transparent; cursor:zoom-in; }
     .creator-copy h2 { margin:1px 0 3px; font-size:25px; line-height:1.2; }
+    .creator-meta { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
     .fan-club { color:var(--accent); font-size:12px; font-weight:650; }
+    .brand-strength { display:inline-flex; align-items:center; gap:6px; padding:3px 7px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:var(--soft); font-size:10px; font-weight:600; white-space:nowrap; }
+    .brand-strength i { width:7px; height:7px; border-radius:50%; background:#8e8e93; box-shadow:0 0 0 2px rgba(142,142,147,.12); }
+    .brand-strength[data-strength="weak"] i { background:#ff3b30; box-shadow:0 0 0 2px rgba(255,59,48,.12); }
+    .brand-strength[data-strength="medium"] i { background:#e7a000; box-shadow:0 0 0 2px rgba(231,160,0,.13); }
+    .brand-strength[data-strength="strong"] i { background:#0a84ff; box-shadow:0 0 0 2px rgba(10,132,255,.12); }
+    .brand-strength[data-strength="exceptional"] i { background:#34c759; box-shadow:0 0 0 2px rgba(52,199,89,.12); }
     .creator-intro { max-width:1080px; margin:10px 0 0; color:var(--muted); font-size:13px; line-height:1.65; }
     .profile-anchor { min-width:280px; align-self:end; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-top:0; padding:11px 13px; border:1px solid var(--line); border-radius:10px; background:var(--soft); }
     .profile-anchor-copy { min-width:0; }
@@ -74,16 +87,18 @@
     .anchor-copy { flex:0 0 auto; padding:6px 9px; border:1px solid var(--line); border-radius:7px; color:var(--accent); background:var(--panel); font-size:10px; font-weight:650; cursor:pointer; }
     .anchor-copy:hover { border-color:var(--accent); }
     .anchor-copy.copied { color:#fff; border-color:var(--green); background:var(--green); }
-    .profile-grid { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(420px,.88fr); grid-template-rows:minmax(190px,auto) minmax(225px,auto); grid-template-areas:"stickers elements" "room colors"; gap:12px 14px; margin-top:18px; }
+    .profile-grid { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(420px,.88fr); align-items:stretch; min-height:427px; gap:14px; margin-top:18px; }
     .profile-block { min-width:0; height:100%; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--soft); }
-    .profile-column { display:contents; }
-    .profile-column:not(.visual) > .profile-block:nth-child(1) { grid-area:elements; }
-    .profile-column:not(.visual) > .profile-block:nth-child(2) { grid-area:colors; }
-    .profile-column.visual > .profile-block:nth-child(1) { grid-area:stickers; }
-    .profile-column.visual > .profile-block:nth-child(2) { grid-area:room; }
-    .profile-column:not(.visual) > .profile-block { display:flex; flex-direction:column; }
-    .profile-column:not(.visual) > .profile-block .tokens { margin-top:14px; }
-    .profile-column:not(.visual) > .profile-block > p { margin-top:auto; padding-top:18px; }
+    .profile-column { min-width:0; display:flex; flex-direction:column; gap:12px; }
+    .profile-column.visual { grid-column:1; grid-row:1; }
+    .profile-column:not(.visual) { grid-column:2; grid-row:1; }
+    .profile-column > .profile-block { flex:1 1 0; }
+    .profile-column.visual > .profile-block:first-child { flex:0 0 190px; }
+    .profile-column:not(.visual) > .profile-block { min-height:auto; display:flex; flex-direction:column; overflow:visible; padding:11px 14px; }
+    .profile-column:not(.visual) > .profile-block .profile-block-head { margin-bottom:0; }
+    .profile-column:not(.visual) > .profile-block .tokens { margin-top:7px; }
+    .profile-column:not(.visual) > .profile-block .token { padding:5px 8px; font-size:10px; }
+    .profile-column:not(.visual) > .profile-block > p { display:block; margin:10px 0 0; padding:0; overflow:visible; font-size:12px; line-height:1.5; }
     .profile-block-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
     .profile-block h3 { margin:0; font-size:14px; }
     .profile-block-head p { margin:3px 0 0; color:var(--tertiary); font-size:10px; }
@@ -134,7 +149,7 @@
     .room-frames { display:grid; grid-template-columns:repeat(2,96px); justify-content:start; gap:10px; }
     .room-frame,.room-frame-placeholder { position:relative; min-width:0; aspect-ratio:9 / 16; overflow:hidden; border:1px solid rgba(0,0,0,.055); border-radius:12px; background:linear-gradient(160deg,#e8e9ee 0%,#f8f8fa 48%,#e2e4ea 100%); }
     .room-frame { padding:0; cursor:zoom-in; }
-    .room-frame img { width:100%; height:100%; object-fit:cover; }
+    .room-frame img { width:100%; height:100%; object-fit:contain; background:#111318; }
     .room-frame-placeholder { display:grid; place-items:center; align-content:center; gap:7px; padding:18px; color:var(--tertiary); text-align:center; }
     .room-frame-placeholder::before { content:""; position:absolute; inset:10px; border:1px solid rgba(0,0,0,.08); border-radius:9px; }
     .room-frame-placeholder strong { position:relative; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--muted); font-size:13px; }
@@ -158,7 +173,7 @@
       .page.content-leave .gift-gallery,.page.content-leave .content,.page.content-enter .gift-gallery,.page.content-enter .content { opacity:1; transform:none; }
     }
     @media (max-width:1200px) { .gift-gallery { grid-template-columns:repeat(5,minmax(0,1fr)); }.solutions { grid-template-columns:1fr; }.solution { max-width:none; }.solution.planb { width:min(100%,420px); }.creator-profile-head { grid-template-columns:88px minmax(0,1fr); }.profile-anchor { grid-column:2; width:min(100%,320px); }.profile-grid { grid-template-columns:minmax(0,1fr) minmax(360px,.8fr); } }
-    @media (max-width:900px) { .mainline-media { grid-template-columns:1fr; gap:14px; }.mainline-media .media { width:100%; margin:0 auto; }.mainline-media .media.video { max-width:400px; }.mainline-media .media.icon { max-width:520px; }.mainline-media .media.panel { max-width:460px; }.creator-profile-head { grid-template-columns:72px minmax(0,1fr); }.profile-anchor { grid-column:2; }.profile-grid { grid-template-columns:1fr; grid-template-rows:auto; grid-template-areas:"stickers" "room" "elements" "colors"; }.profile-sticker-grid { grid-template-rows:88px; grid-auto-columns:88px; }.room-frames { grid-template-columns:repeat(2,92px); } }
+    @media (max-width:900px) { .mainline-media { grid-template-columns:1fr; gap:14px; }.mainline-media .media { width:100%; margin:0 auto; }.mainline-media .media.video { max-width:400px; }.mainline-media .media.icon { max-width:520px; }.mainline-media .media.panel { max-width:460px; }.creator-profile-head { grid-template-columns:72px minmax(0,1fr); }.profile-anchor { grid-column:2; }.profile-grid { grid-template-columns:1fr; min-height:0; }.profile-column.visual { grid-column:1; grid-row:1; }.profile-column:not(.visual) { grid-column:1; grid-row:2; }.profile-column > .profile-block,.profile-column.visual > .profile-block:first-child { flex-basis:auto; }.profile-column:not(.visual) > .profile-block { padding:14px; }.profile-sticker-grid { grid-template-rows:88px; grid-auto-columns:88px; }.room-frames { grid-template-columns:repeat(2,92px); } }
     @media (max-width:720px) { .page { padding:12px 12px 32px; }.topbar,.selector-head { align-items:flex-start; flex-direction:column; }.top-actions { justify-content:flex-start; }.gallery-controls { width:100%; flex-wrap:wrap; justify-content:space-between; }.gift-search { width:100%; }.gift-search input { min-height:40px; font-size:12px; }.pager-wrap { min-width:0; }.pager { min-height:38px; }.pager button { width:38px; height:38px; }.mode-toggle button { min-height:38px; padding-inline:12px; }.gift-gallery { grid-template-columns:repeat(2,minmax(0,1fr)); }.creator-profile { padding:15px; }.creator-profile-head { grid-template-columns:64px minmax(0,1fr); gap:12px; }.creator-avatar { width:64px; height:64px; border-radius:16px; }.creator-copy h2 { font-size:20px; }.profile-anchor { grid-column:1 / -1; min-width:0; width:100%; }.profile-grid { margin-top:14px; }.profile-block { padding:14px; }.room-frames { grid-template-columns:repeat(2,88px); }.solution.mainline { padding:15px; }.mainline-media .media figcaption { font-size:10px; }.media-frame .media-expand { top:5px; right:5px; padding:5px 7px; font-size:10px; }.view-tab,.lang-button { min-height:40px; padding:7px 10px; } }
   </style>
 </head>
@@ -171,24 +186,38 @@
         <div class="lang-switch" aria-label="Language"><button class="lang-button active" data-lang="zh" type="button" aria-pressed="true">中文</button><button class="lang-button" data-lang="en" type="button" aria-pressed="false">EN</button></div>
       </div>
     </header>
-    <section class="selector-head"><div class="gallery-controls"><label class="gift-search"><input id="giftSearch" type="search" aria-label="搜索主播" autocomplete="off" spellcheck="false"></label><div class="mode-toggle"><button id="pagedMode" type="button" aria-pressed="true">每页 10 个</button><button id="allMode" type="button" aria-pressed="false">全部展开</button></div><div class="pager-wrap"><nav class="pager" id="pager" aria-label="礼物分页"></nav><div class="range" id="galleryRange"></div></div></div></section>
+    <section class="selector-head"><div class="gallery-controls"><label class="gift-search"><input id="giftSearch" type="search" aria-label="搜索主播" autocomplete="off" spellcheck="false"></label><label class="strength-sort"><select id="strengthSort" aria-label="品牌强度排序"><option value="natural">自然排序</option><option value="ascending">品牌强度：低到高</option><option value="descending">品牌强度：高到低</option></select></label><div class="mode-toggle"><button id="pagedMode" type="button" aria-pressed="true">每页 10 个</button><button id="allMode" type="button" aria-pressed="false">全部展开</button></div><div class="pager-wrap"><nav class="pager" id="pager" aria-label="礼物分页"></nav><div class="range" id="galleryRange"></div></div></div></section>
     <section class="gift-gallery" id="giftGallery"></section>
     <main class="content" id="content"></main>
   </div>
   <div class="lightbox" id="lightbox" aria-hidden="true"><div class="lightbox-panel" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" tabindex="-1"><div class="lightbox-head"><strong id="lightboxTitle"></strong><button id="lightboxClose" type="button">关闭</button></div><div class="lightbox-body"><img id="lightboxImage" alt=""><video id="lightboxVideo" controls playsinline preload="metadata" hidden></video></div></div></div>
-  <script id="showcase-data" type="application/json">{"viewer_data_version":1,"items":[{"row_id":1,"anchor_id":"demo-gift-001","source_anchor_id":"0000000000000000001","host_name":"Demo Creator","community_name":"Demo Community","fan_club_name":"Demo Club","avatar":"","description":{"zh":"???????? Viewer ???????????????????????????????","en":"This fictional creator introduction demonstrates the Viewer layout. Replace it with project data during the build step."},"element_reason":{"zh":"???????????????????????","en":"A star and a sparkle demonstrate element tags and rationale layout."},"color_reason":{"zh":"???????????????????????","en":"Purple, gold, and cyan demonstrate palette chips and rationale text."},"design":{"exact_text":"Community","primary_object":"star","secondary_object":"sparkle","colors":["purple","gold","cyan"]},"stickers":[],"anchor_frames":[],"matting":{"mainline":{"status":"missing","icon":{"status":"missing","asset":""},"gift_panel":{"status":"missing","asset":""},"video":{"status":"missing","asset":""}},"planb":{"status":"missing","icon":{"status":"missing","asset":""}}}}]}</script>
+  <script id="showcase-data" type="application/json">{"viewer_data_version":1,"items":[{"row_id":1,"anchor_id":"demo-gift-001","source_anchor_id":"0000000000000000001","host_name":"Demo Creator","community_name":"Demo Community","fan_club_name":"Demo Club","avatar":"","description":{"zh":"这是一个虚构的主播简介，用于展示 Viewer 的排版结构。构建实际项目时请替换为项目数据。","en":"This fictional creator introduction demonstrates the Viewer layout. Replace it with project data during the build step."},"element_reason":{"zh":"星星与闪光用于演示元素标签和选择理由的排版。","en":"A star and a sparkle demonstrate element tags and rationale layout."},"color_reason":{"zh":"紫色、金色与青色用于演示配色标签和选择理由的排版。","en":"Purple, gold, and cyan demonstrate palette chips and rationale text."},"text_rationale":{"en":"The slogan uses the official fan club name, giving the gift a clear and recognizable community identity."},"text_rationale_sources":[{"type":"anchor_field","source_id":"fans_club_name"}],"design":{"exact_text":"Demo Club","primary_object":"star","secondary_object":"sparkle","colors":["purple","gold","cyan"]},"pak_metadata":{"llm_tier":"strong","llm_score":82,"fallback_slots":0,"selected_sticker_count":0,"selected_frame_count":0},"curated_stickers":[],"anchor_frames":[],"matting":{"mainline":{"status":"missing","icon":{"status":"missing","asset":""},"gift_panel":{"status":"missing","asset":""},"video":{"status":"missing","asset":""}},"planb":{"status":"missing","icon":{"status":"missing","asset":""}}}}]}</script>
   <script>
     const data=JSON.parse(document.getElementById('showcase-data').textContent);
     const reviewBaseHref="review.html",workflowBaseHref="workflow.html";
     const initialParams=new URLSearchParams(location.search),requestedAnchorId=initialParams.get('anchor_id');
     let selectedIndex=requestedAnchorId?data.items.findIndex(item=>String(item.anchor_id||'')===requestedAnchorId):0;
     if(selectedIndex<0)selectedIndex=0;
-    let uiLang=initialParams.get('lang')==='en'?'en':'zh',galleryMode='paged',currentPage=Math.floor(selectedIndex/10),searchTerm='',lightboxReturnFocus=null,transitionTimer=null;
+    let uiLang=initialParams.get('lang')==='en'?'en':'zh',galleryMode='paged',currentPage=Math.floor(selectedIndex/10),searchTerm='',strengthSort='natural',lightboxReturnFocus=null,transitionTimer=null;
     const pageSize=10;
     const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     const t=(zh,en)=>uiLang==='zh'?zh:en;
     const current=()=>data.items[selectedIndex]||{};
     const localized=value=>String(value?.[uiLang]||value?.[uiLang==='zh'?'en':'zh']||'').trim();
+    function textRationale(item){
+      const english=String(item?.text_rationale?.en||'').trim();
+      if(uiLang==='en')return english;
+      const exactText=String(item?.design?.exact_text||'').trim();
+      const quoted=exactText?`“${exactText}”`:'该文案';
+      const refs=Array.isArray(item?.text_rationale_sources)?item.text_rationale_sources:[];
+      const sources=refs.map(ref=>String(ref?.source_id||''));
+      const types=refs.map(ref=>String(ref?.type||''));
+      if(sources.includes('fans_club_name'))return `${quoted}取自主播官方粉丝团名称，是最直接、最具社群归属感的礼物文案。`;
+      if(types.includes('symbol')&&sources.includes('nick_name'))return `${quoted}同时来自主播昵称与核心社群符号，能够直接代表主播及其粉丝社群。`;
+      if(types.includes('symbol'))return `${quoted}取自高识别度的社群名称或核心符号，便于粉丝快速建立归属感。`;
+      if(sources.includes('nick_name'))return `${quoted}取自主播常用昵称，是观众最容易识别和记住的称呼。`;
+      return `${quoted}根据主播与社群的现有身份信息选定，用于保持礼物文案清晰且具有代表性。`;
+    }
     function linkedHref(base,anchor){const url=new URL(base,location.href);url.searchParams.set('anchor_id',anchor);url.searchParams.set('lang',uiLang);return url.pathname.split('/').pop()+url.search;}
     function syncUrl(){const url=new URL(location.href),anchor=String(current().anchor_id||'');if(anchor)url.searchParams.set('anchor_id',anchor);url.searchParams.set('lang',uiLang);history.replaceState(null,'',url);document.getElementById('reviewLink').href=linkedHref(reviewBaseHref,anchor);document.getElementById('workflowLink').href=linkedHref(workflowBaseHref,anchor);}
     function state(slot){const status=slot?.status||'missing';if(status==='succeeded')return {tone:'ok',label:t('已就绪','Ready')};if(status==='failed')return {tone:'fail',label:t('暂不可用','Unavailable')};if(status==='skipped')return {tone:'',label:t('待生成','Pending')};return {tone:'',label:t('待接入','Pending')};}
@@ -199,21 +228,32 @@
     function solution(item,branch){const value=item.matting?.[branch]||{},mainline=branch==='mainline';if(!mainline){const title=t('经典方案（PlanB）','Classic Option (PlanB)'),subtitle=t('保留经典图标作为轻量备选','A lightweight classic icon alternative');return `<article class="solution planb"><div class="solution-head"><div><h3>${esc(title)}</h3><p>${esc(subtitle)}</p></div>${statusHtml(value.icon)}</div><div class="planb-icon"><div class="planb-icon-frame">${imageButton(value.icon,t('PlanB 透明礼物图标','PlanB transparent gift icon'))}</div><div class="planb-copy"><strong>${esc(t('经典透明图标','Classic transparent icon'))}</strong><p>${esc(t('PlanB 不包含送礼面板与动态视频。','PlanB does not include a gift panel or animation.'))}</p></div></div></article>`;}const title=t('专属定制（Mainline）','Custom Design (Mainline)'),subtitle=t('围绕主播与社群特点打造的完整礼物体验','A complete gift experience created around the creator and community');return `<article class="solution mainline"><div class="solution-head"><div><h3>${esc(title)}</h3><p>${esc(subtitle)}</p></div>${statusHtml(value)}</div><div class="mainline-media">${media(value.video,'video',t('动态效果','Live animation'))}${media(value.icon,'icon',t('透明礼物图标','Transparent gift icon'))}${media(value.gift_panel,'panel',t('送礼面板','Gift panel'))}</div></article>`;}
     const colorMap={purple:'#8b5cf6',violet:'#7c3aed',orange:'#f59e0b',cyan:'#22d3ee',blue:'#3b82f6',pink:'#ec4899',red:'#ef4444',green:'#22c55e',yellow:'#eab308',gold:'#d4a72c',silver:'#a8adb4',white:'#f7f7f7',cream:'#f3e4c7',black:'#34363b',graphite:'#4b4f58',gray:'#8b8f96',grey:'#8b8f96'};
     function swatch(value){const lower=String(value||'').toLowerCase(),key=Object.keys(colorMap).find(name=>lower.includes(name));return key?colorMap[key]:'#d2d2d7';}
-    function filteredItems(){const query=searchTerm.trim().toLocaleLowerCase();if(!query)return data.items;return data.items.filter(item=>{const row=String(item.row_id??''),rowPadded=row.padStart(3,'0');return [item.host_name,item.community_name,item.fan_club_name,item.source_anchor_id,item.anchor_id,row,`#${row}`,`row${row}`,`row${rowPadded}`].some(value=>String(value??'').toLocaleLowerCase().includes(query));});}
+    function brandStrength(item){
+      const tier=String(item?.pak_metadata?.llm_tier||'').trim().toLowerCase();
+      return ['weak','medium','strong','exceptional'].includes(tier)?tier:'unknown';
+    }
+    function brandStrengthLabel(value){
+      return ({weak:t('弱','Weak'),medium:t('中','Medium'),strong:t('强','Strong'),exceptional:t('卓越','Exceptional')})[value]||t('未提供','Not available');
+    }
+    function filteredItems(){const query=searchTerm.trim().toLocaleLowerCase(),filtered=query?data.items.filter(item=>{const row=String(item.row_id??''),rowPadded=row.padStart(3,'0');return [item.host_name,item.community_name,item.fan_club_name,item.source_anchor_id,item.anchor_id,row,`#${row}`,`row${row}`,`row${rowPadded}`].some(value=>String(value??'').toLocaleLowerCase().includes(query));}):data.items;if(strengthSort==='natural')return filtered;const rank={unknown:-1,weak:0,medium:1,strong:2,exceptional:3},direction=strengthSort==='ascending'?1:-1;return [...filtered].sort((a,b)=>direction*((rank[brandStrength(a)]??-1)-(rank[brandStrength(b)]??-1))||data.items.indexOf(a)-data.items.indexOf(b));}
     function updateGallerySelection(){document.querySelectorAll('.gift-card[data-index]').forEach(button=>{const active=Number(button.dataset.index)===selectedIndex;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});}
     function renderGallery(){const filtered=filteredItems(),totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));currentPage=Math.min(currentPage,totalPages-1);const items=galleryMode==='all'?filtered:filtered.slice(currentPage*pageSize,Math.min(filtered.length,(currentPage+1)*pageSize)),gallery=document.getElementById('giftGallery');gallery.innerHTML=items.length?items.map(item=>{const index=data.items.indexOf(item),icon=item.matting?.mainline?.icon?.asset||item.matting?.planb?.icon?.asset||'',name=item.host_name||t('未命名主播','Unnamed creator'),thumb=icon?`<img src="${esc(icon)}" alt="" loading="lazy" decoding="async">`:(item.avatar?`<span class="gift-fallback"><img src="${esc(item.avatar)}" alt="" loading="lazy" decoding="async"></span>`:'');return `<button type="button" class="gift-card ${index===selectedIndex?'active':''}" data-index="${index}" aria-label="${esc(name)}" aria-pressed="${index===selectedIndex}"><span class="gift-thumb">${thumb}</span></button>`;}).join(''):`<div class="gift-search-empty">${esc(t('没有找到匹配的主播','No matching creators found'))}</div>`;document.querySelectorAll('[data-index]').forEach(button=>button.onclick=()=>{const nextIndex=Number(button.dataset.index),direction=nextIndex>=selectedIndex?1:-1;if(nextIndex===selectedIndex)return;selectedIndex=nextIndex;updateGallerySelection();renderWithMotion(direction,true);});renderPager(filtered);}
     function renderPager(filtered=filteredItems()){const total=Math.max(1,Math.ceil(filtered.length/pageSize)),start=filtered.length?(galleryMode==='all'?1:currentPage*pageSize+1):0,end=galleryMode==='all'?filtered.length:Math.min(filtered.length,(currentPage+1)*pageSize);document.getElementById('pager').innerHTML=galleryMode==='all'||!filtered.length?'':Array.from({length:total},(_,index)=>`<button type="button" data-page="${index}" aria-current="${index===currentPage?'page':'false'}">${index+1}</button>`).join('');document.getElementById('galleryRange').textContent=searchTerm?t(`${filtered.length} 个结果`,`${filtered.length} results`):(filtered.length?t(`当前 ${start}-${end} / ${filtered.length}`,`${start}-${end} of ${filtered.length}`):t('暂无礼物','No gifts'));document.querySelectorAll('[data-page]').forEach(button=>button.onclick=()=>{const nextPage=Number(button.dataset.page),direction=nextPage>=currentPage?1:-1;currentPage=nextPage;const nextItem=filtered[currentPage*pageSize];if(nextItem)selectedIndex=data.items.indexOf(nextItem);renderWithMotion(direction);});}
     function renderContent(){
       const item=current();
       const description=localized(item.description);
+      const textReason=textRationale(item);
       const elementReason=localized(item.element_reason);
       const colorReason=localized(item.color_reason);
       const colors=item.design?.colors||[];
-      const stickers=item.stickers||[];
-      const anchorFrames=(Array.isArray(item.anchor_frames)?item.anchor_frames:[])
+      const stickerSource=Array.isArray(item.curated_stickers)?item.curated_stickers:(item.stickers||[]);
+      const stickers=Array.isArray(item.curated_stickers)?stickerSource:stickerSource.slice(0,7);
+      const frameSource=Array.isArray(item.anchor_frames)?item.anchor_frames:(Array.isArray(item.live_room_frames)?item.live_room_frames:(Array.isArray(item.frames)?item.frames:[]));
+      const anchorFrames=frameSource
         .map(frame=>typeof frame==='string'?frame:frame?.asset)
         .filter(Boolean);
       const anchorId=item.source_anchor_id||t('暂未提供','Not available');
+      const strength=brandStrength(item);
       const stickerMarkup=stickers.length
         ? `<div class="profile-sticker-grid">${stickers.map((sticker,index)=>`<button class="sticker" type="button" data-preview="${esc(sticker.asset)}" data-title="${esc(t(`主播贴纸 ${index+1}`,`Creator sticker ${index+1}`))}" data-media-kind="image"><img src="${esc(sticker.asset)}" alt="${esc(t('主播贴纸','Creator sticker'))}" loading="lazy" decoding="async"></button>`).join('')}</div>`
         : `<div class="sticker-empty">${esc(t('暂无可展示贴纸','No stickers available yet'))}</div>`;
@@ -227,7 +267,10 @@
           <header class="creator-profile-head">
             <div class="creator-avatar">${item.avatar?`<button type="button" data-preview="${esc(item.avatar)}" data-title="${esc(t('主播头像','Creator avatar'))}" data-media-kind="image"><img src="${esc(item.avatar)}" alt="${esc(item.host_name)}" loading="lazy" decoding="async"></button>`:esc(t('暂无头像','No avatar'))}</div>
             <div class="creator-copy">
-              <span class="fan-club">${esc(item.fan_club_name||item.community_name||t('专属社区礼物','Community gift'))}</span>
+              <div class="creator-meta">
+                <span class="fan-club">${esc(item.fan_club_name||item.community_name||t('专属社区礼物','Community gift'))}</span>
+                <span class="brand-strength" data-strength="${esc(strength)}"><i aria-hidden="true"></i>${esc(t('品牌强度','Brand Strength'))} · ${esc(brandStrengthLabel(strength))}</span>
+              </div>
               <h2>${esc(item.host_name||t('未命名主播','Unnamed creator'))}</h2>
               <p class="creator-intro ${description?'':'empty-copy'}">${esc(description||t('主播介绍正在准备中','Creator introduction is being prepared'))}</p>
             </div>
@@ -239,14 +282,19 @@
           <div class="profile-grid">
             <div class="profile-column">
               <article class="profile-block">
-                <div class="profile-block-head"><div><h3>${esc(t('元素选择','Elements'))}</h3><p>${esc(t('礼物主题与社群符号','Gift theme and community symbols'))}</p></div></div>
+                <div class="profile-block-head"><div><h3>${esc(t('元素选择','Elements'))}</h3></div></div>
                 <div class="tokens"><span class="token">${esc(item.design?.primary_object||t('主元素待补充','Primary pending'))}</span><span class="token">${esc(item.design?.secondary_object||t('次元素待补充','Secondary pending'))}</span></div>
-                <p class="${elementReason?'':'empty-copy'}">${esc(elementReason||t('元素选择说明待补充','Element rationale is being prepared'))}</p>
+                <p class="${elementReason?'':'empty-copy'}" title="${esc(elementReason)}">${esc(elementReason||t('元素选择说明待补充','Element rationale is being prepared'))}</p>
               </article>
               <article class="profile-block">
-                <div class="profile-block-head"><div><h3>${esc(t('色彩选择','Colors'))}</h3><p>${esc(t('主播视觉记忆与礼物配色','Creator visual cues and gift palette'))}</p></div></div>
+                <div class="profile-block-head"><div><h3>${esc(t('色彩选择','Colors'))}</h3></div></div>
                 <div class="tokens">${colors.map(color=>`<span class="token"><i class="swatch" style="--swatch:${swatch(color)}"></i>${esc(color)}</span>`).join('')||`<span class="token">${esc(t('配色待补充','Colors pending'))}</span>`}</div>
-                <p class="${colorReason?'':'empty-copy'}">${esc(colorReason||t('色彩选择说明待补充','Color rationale is being prepared'))}</p>
+                <p class="${colorReason?'':'empty-copy'}" title="${esc(colorReason)}">${esc(colorReason||t('色彩选择说明待补充','Color rationale is being prepared'))}</p>
+              </article>
+              <article class="profile-block">
+                <div class="profile-block-head"><div><h3>${esc(t('文案选择','Slogan'))}</h3></div></div>
+                <div class="tokens"><span class="token">${esc(item.design?.exact_text||t('文案待补充','Slogan pending'))}</span></div>
+                <p class="${textReason?'':'empty-copy'}" title="${esc(textReason)}">${esc(textReason||t('文案选择说明待补充','Slogan rationale is being prepared'))}</p>
               </article>
             </div>
             <div class="profile-column visual">
@@ -298,7 +346,7 @@
         };
       });
     }
-    function renderChrome(){document.documentElement.lang=uiLang==='zh'?'zh-CN':'en';document.getElementById('pageTitle').textContent=t('Community Gifts · 礼物预览','Community Gifts · Gift Preview');document.getElementById('pageSubtitle').textContent=t('为每位主播呈现专属社区礼物与最终动态效果。','A friendly preview of each creator’s community gift and final animation.');document.getElementById('showcaseTab').textContent=t('礼物预览','Gift Preview');document.getElementById('reviewLink').textContent=t('结果审核台','Review');document.getElementById('workflowLink').textContent=t('工作流画布','Workflow');const search=document.getElementById('giftSearch');search.placeholder=t('搜索主播','Search creators');search.setAttribute('aria-label',t('搜索主播','Search creators'));document.getElementById('pagedMode').textContent=t('每页 10 个','10 per page');document.getElementById('allMode').textContent=t('全部展开','Show all');document.getElementById('lightboxClose').textContent=t('关闭','Close');document.querySelectorAll('[data-lang]').forEach(button=>{const active=button.dataset.lang===uiLang;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});}
+    function renderChrome(){document.documentElement.lang=uiLang==='zh'?'zh-CN':'en';document.getElementById('pageTitle').textContent=t('Community Gifts · 礼物预览','Community Gifts · Gift Preview');document.getElementById('pageSubtitle').textContent=t('为每位主播呈现专属社区礼物与最终动态效果。','A friendly preview of each creator’s community gift and final animation.');document.getElementById('showcaseTab').textContent=t('礼物预览','Gift Preview');document.getElementById('reviewLink').textContent=t('结果审核台','Review');document.getElementById('workflowLink').textContent=t('工作流画布','Workflow');const search=document.getElementById('giftSearch');search.placeholder=t('搜索主播','Search creators');search.setAttribute('aria-label',t('搜索主播','Search creators'));const sort=document.getElementById('strengthSort');sort.setAttribute('aria-label',t('品牌强度排序','Sort by brand strength'));sort.options[0].textContent=t('自然排序','Natural order');sort.options[1].textContent=t('品牌强度：低到高','Brand strength: low to high');sort.options[2].textContent=t('品牌强度：高到低','Brand strength: high to low');document.getElementById('pagedMode').textContent=t('每页 10 个','10 per page');document.getElementById('allMode').textContent=t('全部展开','Show all');document.getElementById('lightboxClose').textContent=t('关闭','Close');document.querySelectorAll('[data-lang]').forEach(button=>{const active=button.dataset.lang===uiLang;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});}
     function wirePreview(){document.querySelectorAll('[data-preview]').forEach(button=>button.onclick=()=>openLightbox(button.dataset.preview,button.dataset.title,button.dataset.mediaKind||'image'));}
     function openLightbox(src,title,kind='image'){lightboxReturnFocus=document.activeElement;const image=document.getElementById('lightboxImage'),video=document.getElementById('lightboxVideo'),isVideo=kind==='video';image.hidden=isVideo;video.hidden=!isVideo;if(isVideo){image.src='';video.src=src;}else{video.pause();video.removeAttribute('src');video.load();image.src=src;image.alt=title;}document.getElementById('lightboxTitle').textContent=title;document.getElementById('lightbox').classList.add('open');document.getElementById('lightbox').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');document.getElementById('lightboxClose').focus();}
     function closeLightbox(){const box=document.getElementById('lightbox');if(!box.classList.contains('open'))return;const video=document.getElementById('lightboxVideo');video.pause();video.removeAttribute('src');video.load();box.classList.remove('open');box.setAttribute('aria-hidden','true');document.getElementById('lightboxImage').src='';document.body.classList.remove('modal-open');if(lightboxReturnFocus?.focus)lightboxReturnFocus.focus();lightboxReturnFocus=null;}
@@ -321,6 +369,7 @@
       },120);
     }
     document.getElementById('giftSearch').oninput=event=>{searchTerm=event.target.value;currentPage=searchTerm.trim()?0:Math.floor(selectedIndex/pageSize);renderGallery();};
+    document.getElementById('strengthSort').onchange=event=>{strengthSort=event.target.value;const position=filteredItems().indexOf(current());currentPage=position>=0?Math.floor(position/pageSize):0;renderGallery();};
     document.querySelectorAll('[data-lang]').forEach(button=>button.onclick=()=>{const direction=button.dataset.lang==='en'?1:-1;if(button.dataset.lang===uiLang)return;uiLang=button.dataset.lang;animateControl(button,direction);renderWithMotion(direction);});
     document.getElementById('pagedMode').onclick=()=>{if(galleryMode==='paged')return;galleryMode='paged';const position=filteredItems().indexOf(current());currentPage=position>=0?Math.floor(position/pageSize):0;document.getElementById('pagedMode').setAttribute('aria-pressed','true');document.getElementById('allMode').setAttribute('aria-pressed','false');animateControl(document.getElementById('pagedMode'),-1);renderWithMotion(-1);};
     document.getElementById('allMode').onclick=()=>{if(galleryMode==='all')return;galleryMode='all';document.getElementById('pagedMode').setAttribute('aria-pressed','false');document.getElementById('allMode').setAttribute('aria-pressed','true');animateControl(document.getElementById('allMode'),1);renderWithMotion(1);};
