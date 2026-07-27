@@ -1,5 +1,12 @@
 {
   "viewer_data_version": 1,
+  "transformation_meta": {
+    "input_contract": "design_slots_v1",
+    "design_slot_model": "demo-model",
+    "image_provider": "demo-provider",
+    "design_slot_prompt_hash": "demo-prompt-hash",
+    "design_slot_prompt_available": false
+  },
   "items": [
     {
       "row_id": 1,
@@ -49,6 +56,134 @@
       },
       "curated_stickers": [],
       "anchor_frames": [],
+      "transformation": {
+        "prompt_hash": "demo-prompt-hash",
+        "sources": {
+          "creator_fields": [
+            "nick_name",
+            "bio_description",
+            "fans_club_name"
+          ],
+          "ranked_symbol_count": 4,
+          "top_symbols": [
+            {
+              "symbol": "Demo Club",
+              "category": "community",
+              "strength": "high"
+            },
+            {
+              "symbol": "star",
+              "category": "community",
+              "strength": "high"
+            },
+            {
+              "symbol": "sparkle",
+              "category": "host",
+              "strength": "medium"
+            }
+          ],
+          "evidence_count": 12,
+          "asr_evidence_count": 4,
+          "chat_evidence_count": 8,
+          "scored_sticker_count": 0,
+          "selected_sticker_count": 0,
+          "selected_frame_count": 0,
+          "displayed_frame_count": 0,
+          "avatar_available": false
+        },
+        "design_slots": {
+          "exact_text": {
+            "value": "Demo Club",
+            "strength": "",
+            "evidence_refs": [],
+            "rationale": "Fictional community name used for the public template."
+          },
+          "primary_object": {
+            "value": "star",
+            "strength": "high",
+            "evidence_refs": [],
+            "rationale": "Fictional primary symbol."
+          },
+          "secondary_object": {
+            "value": "sparkle",
+            "strength": "medium",
+            "evidence_refs": [],
+            "rationale": "Fictional supporting symbol."
+          },
+          "palette": [
+            {
+              "value": "purple",
+              "strength": "high",
+              "evidence_refs": [],
+              "rationale": "Fictional primary color."
+            },
+            {
+              "value": "gold",
+              "strength": "medium",
+              "evidence_refs": [],
+              "rationale": "Fictional secondary color."
+            },
+            {
+              "value": "cyan",
+              "strength": "medium",
+              "evidence_refs": [],
+              "rationale": "Fictional accent color."
+            }
+          ],
+          "materials": {
+            "main": "pearlescent_resin",
+            "supporting": "matte_rubber",
+            "accent": "soft_emissive_panel"
+          }
+        },
+        "creative": {
+          "status": "succeeded",
+          "input_mode": "text_only",
+          "style_pitch": "星光纪念章",
+          "lamp_head_silhouette": "灯头采用圆润星形徽章轮廓，中央保留完整发光核心，整体结构简洁、对称且适合量产。",
+          "fusion_note": "以星形作为主体轮廓，闪光只作为边缘和中央的小面积点缀，保持清晰的主次关系。",
+          "material_application": "珠光树脂用于灯头主体，哑光橡胶用于握柄和连接结构，小面积柔光面板用于中央文字与星点。",
+          "lighting": "中央文字均匀柔光，外缘保留少量星点亮光，不使用连续霓虹描边。",
+          "mood": "温柔、明亮、具有纪念感"
+        },
+        "routing": {
+          "final_prompt_palette": [
+            "purple",
+            "gold",
+            "cyan"
+          ],
+          "color_reason": "Fictional palette for the public template.",
+          "color_adjustments": [],
+          "final_materials": {
+            "main": "pearlescent_resin",
+            "supporting": "matte_rubber",
+            "accent": "soft_emissive_panel"
+          },
+          "material_prompt_terms": [
+            "pearlescent resin body",
+            "matte rubber grip",
+            "small soft emissive panel"
+          ],
+          "reference_id": "demo_reference",
+          "reference_reason": "",
+          "chroma_screen": "#00FF00"
+        },
+        "prompts": {
+          "mainline": {
+            "prompt": "Public template example: create a complete handheld community gift using the fictional Demo Club design slots, with a rounded star silhouette, purple, gold and cyan palette, and the exact text “Demo Club”.",
+            "negative_prompt": "real person, real creator identity, real platform data, extra text, cropped product"
+          },
+          "planb": {
+            "prompt": "Public template PlanB example: preserve the fictional template structure and replace the visible text with exactly “Demo Club”.",
+            "negative_prompt": "real person, real creator identity, real platform data, extra text"
+          },
+          "video": {
+            "prompt": "Public template video example with a fixed camera and a fictional handheld gift.",
+            "negative_prompt": "",
+            "model": "demo-video-model"
+          }
+        }
+      },
       "matting": {
         "mainline": {
           "status": "missing",

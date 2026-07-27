@@ -6,7 +6,7 @@ The repository preserves the reusable page structure and interactions without in
 
 ## Included pages
 
-- `index.html` — creator profile, brand strength, design rationale, stickers, live-room frames, Mainline delivery, and PlanB preview.
+- `index.html` — creator profile, brand strength, design rationale, delivery results, and the optional signals-to-prompt transformation panel.
 - `review.html` — detailed result review and trace inspection.
 - `workflow.html` — workflow and field-contract visualization.
 - `START_WINDOWS_SERVER.bat` — one-click Windows LAN server.
@@ -81,6 +81,15 @@ weak < medium < strong < exceptional
 ```
 
 It controls both the profile badge and the low-to-high/high-to-low sorting options.
+
+When an item contains a `transformation` object, the bottom panel presents four compact stages:
+
+1. Creator and community signals
+2. Pak-locked Design Slots
+3. Creative LLM interpretation
+4. Final Mainline and PlanB prompts
+
+The page keeps the video prompt in data but intentionally exposes only Mainline and PlanB in the Viewer. Full prompts and negative prompts open in a modal instead of filling the page.
 
 Example optional fields:
 
