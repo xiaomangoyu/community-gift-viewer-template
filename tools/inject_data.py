@@ -46,6 +46,10 @@ def build(showcase_path: Path, workflow_path: Path | None, output_dir: Path) -> 
     ):
         shutil.copy2(ROOT / name, output_dir / name)
 
+    font_dir = ROOT / "font"
+    if font_dir.is_dir():
+        shutil.copytree(font_dir, output_dir / "font", dirs_exist_ok=True)
+
     showcase = load_json(showcase_path)
     inject_json(output_dir / "index.html", "showcase-data", showcase)
 
@@ -92,4 +96,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

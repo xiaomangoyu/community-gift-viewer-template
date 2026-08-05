@@ -9,6 +9,7 @@ The repository preserves the reusable page structure and interactions without in
 - `index.html` — creator profile, brand strength, design rationale, delivery results, and the optional signals-to-prompt transformation panel.
 - `review.html` — detailed result review and trace inspection.
 - `workflow.html` — workflow and field-contract visualization.
+- `font/` — bundled TikTok Sans font used by the latest Viewer layout.
 - `START_WINDOWS_SERVER.bat` — one-click Windows LAN server.
 
 All pages are static HTML. No backend, database, npm install, or build framework is required.
